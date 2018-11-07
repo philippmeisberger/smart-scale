@@ -1,6 +1,8 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
+#include <Adafruit_SSD1306.h>
+//#include <HX711_ADC.h>
 
 #include "config.h"
 
@@ -10,15 +12,18 @@ WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
+// Connect SCL to D1 and SDA to D2
+#define OLED_RESET 0
+Adafruit_SSD1306 display(OLED_RESET);
+
 void setup()
 {
     Serial.begin(115200);
     delay(250);
     Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
   
-  #ifdef PIN_STATUSLED
-    pinMode(PIN_STATUSLED, OUTPUT);
-  #endif
+    // initialize with the I2C addr 0x3C (for the 128x32)
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
     setupWifi();
     mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
@@ -40,15 +45,15 @@ void setupWifi()
     // Wi-Fi not yet connected?
     while (WiFi.status() != WL_CONNECTED)
     {
-        // Blink 2 times when connecting
-        blinkStatusLED(2);
+        updateDisplay(250, "Connecting ...");
         Serial.print(".");
         delay(500);
     }
 
     // Wi-Fi connection established
-    Serial.print(F("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: "));
+    Serial.print("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
     Serial.println(WiFi.localIP());
+    updateDisplay(250, "");
 }
 
 void connectMqtt()
@@ -62,47 +67,59 @@ void connectMqtt()
             Serial.println("connect(): Connected to MQTT broker");
 
             // Publish initial state
-            publishState();
+            publishState(250);
         }
         else
         {
             Serial.printf("connect(): Connection failed with error code %i. Try again...\n", mqttClient.state());
-            blinkStatusLED(3);
+            updateDisplay(250, "MQTT connection failed");
             delay(2000);
         }
     }
 }
 
-void publishState()
+void updateDisplay(const int consumed, const char* statusText)
 {
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+
+    // Show consumption
+    display.setTextSize(3);
+    display.setCursor(0, 0);
+
+    // Consumed more than 1000ml
+    if (consumed >= 1000)
+    {
+        display.print(String(consumed / 1000) + "l");
+    }
+    else
+    {
+        display.print(String(consumed) + "ml");
+    }
+    
+    // Show status
+    display.setTextSize(1);
+    display.setCursor(0, 24);
+    display.print(statusText);
+
+    display.display();
+}
+
+void publishState(const int consumed)
+{
+    updateDisplay(consumed, "");
     StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
     JsonObject& weight = jsonBuffer.createObject();
 
     // milli liters
     weight["total"] = 2500;
-    weight["actual"] = 250;
+    weight["actual"] = consumed;
 
     char message[weight.measureLength() + 1];
     weight.printTo(message, sizeof(message));
 
     Serial.printf("publishState(): Publish message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
     mqttClient.publish(MQTT_CHANNEL_STATE, message);
-}
-
-void blinkStatusLED(const int times)
-{
-  #ifdef PIN_STATUSLED
-    for (int i = 0; i < times; i++)
-    {
-        // Enable LED (LOW = on)
-        digitalWrite(PIN_STATUSLED, LOW);
-        delay(100);
-
-        // Disable LED (HIGH = off)
-        digitalWrite(PIN_STATUSLED, HIGH);
-        delay(100);
-    }
-  #endif
 }
 
 void loop()
