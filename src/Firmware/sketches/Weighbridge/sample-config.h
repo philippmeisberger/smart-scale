@@ -7,3 +7,4 @@
 #define MQTT_USERNAME               MQTT_CLIENTID
 #define MQTT_PASSWORD               ""
 #define MQTT_CHANNEL_STATE          "/weighbridge/api/1/state/"
+#define MQTT_CONNECTION_ATTEMPTS    3

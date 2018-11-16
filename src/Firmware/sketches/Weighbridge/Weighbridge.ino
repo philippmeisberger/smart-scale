@@ -1,6 +1,6 @@
-//#include <ESP8266WiFi.h>
-//#include <PubSubClient.h>
-//#include <ArduinoJson.h>
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <HX711_ADC.h>
@@ -9,9 +9,9 @@
 
 #define FIRMWARE_VERSION "0.1"
 
-/*WiFiClient wifiClient = WiFiClient();
+WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);*/
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 // Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
@@ -21,8 +21,16 @@ Adafruit_SSD1306 display(OLED_RESET);
 // Connect SCK to D8, DT to D3
 HX711_ADC hx711(D3, D8);
 
-int weight, lastWeightSent = 0;
 int t = 0;
+
+// Current weight
+int weight = 0;
+
+// Last published weight
+int lastWeightSent = 0;
+
+// Number of attempts to connect to MQTT broker
+int mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
 
 void setup()
 {
@@ -31,8 +39,8 @@ void setup()
     Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
     setupDisplay();
     setupScale();
-    /*setupWifi();
-    mqttClient.setServer(MQTT_SERVER, MQTT_PORT);*/
+    setupWifi();
+    mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
 }
 
 void setupDisplay()
@@ -55,7 +63,7 @@ void setupScale()
   hx711.setCalFactor(392.0);
 }
 
-/*void setupWifi()
+void setupWifi()
 {
     Serial.printf("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
 
@@ -81,29 +89,6 @@ void setupScale()
     Serial.println(WiFi.localIP());
     updateStatus("");
 }
-
-void connectMqtt()
-{
-    while (!mqttClient.connected())
-    {
-        Serial.printf("connect(): Connecting to MQTT broker '%s:%i'...", MQTT_SERVER, MQTT_PORT);
-        
-        if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
-        {
-            Serial.println("connect(): Connected to MQTT broker");
-
-            // Publish initial state
-            publishState(0);
-            updateStatus("");
-        }
-        else
-        {
-            Serial.printf("connect(): Connection failed with error code %i. Try again...\n", mqttClient.state());
-            updateStatus("MQTT connection failed");
-            delay(2000);
-        }
-    }
-}*/
 
 void updateDisplay(const int consumed, const char* statusText)
 {
@@ -135,13 +120,41 @@ void updateStatus(const char* statusText)
     display.display();
 }
 
-/*void publishState(const int consumed)
+void publishState(const int consumed)
 {
+    // Connect MQTT broker
+    while (!mqttClient.connected())
+    {
+        Serial.printf("publishState(): Connecting to MQTT broker '%s:%i'...", MQTT_SERVER, MQTT_PORT);
+        
+        if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
+        {
+            Serial.println("publishState(): Connected to MQTT broker");
+            updateStatus("");
+        }
+        else
+        {
+            Serial.printf("publishState(): Connection failed with error code %i. Try again...\n", mqttClient.state());
+            updateStatus("MQTT connection failed");
+
+            // Give up?
+            if (mqttConnectionAttempts == 0)
+            {
+                mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
+                return;
+            }
+                
+            mqttConnectionAttempts--;
+            delay(2000);
+        }
+    }
+
+    // Send weight
     StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
     JsonObject& weight = jsonBuffer.createObject();
 
     // milli liters
-    weight["total"] = 2500;
+    weight["total"] = 0;
     weight["actual"] = consumed;
 
     char message[weight.measureLength() + 1];
@@ -149,7 +162,7 @@ void updateStatus(const char* statusText)
 
     Serial.printf("publishState(): Publish message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
     mqttClient.publish(MQTT_CHANNEL_STATE, message);
-}*/
+}
 
 float getWeight()
 {
@@ -161,6 +174,7 @@ void loop()
 {   
     if (weight != round(getWeight()))
     {
+        // Show weight on display
         t = millis();
         weight = round(getWeight());
         Serial.print("loop(): ");
@@ -172,13 +186,14 @@ void loop()
         // Stabilized?
         if ((millis() - t > 2000) && (weight == round(getWeight())) && (lastWeightSent != weight))
         {
+            // Publish weight
             t = millis();
             lastWeightSent = weight;
-            Serial.print("loop(): Sending weight: ");
+            Serial.print("loop(): Publishing weight: ");
             Serial.println(weight);
-            //connectMqtt();
+            publishState(weight);
         }
 
-        //mqttClient.loop();
+        mqttClient.loop();
     }
 }
