@@ -21,8 +21,8 @@ Adafruit_SSD1306 display(OLED_RESET);
 // Connect SCK to D8, DT to D3
 HX711_ADC hx711(D3, D8);
 
-int weight = 0;
-//int t = millis();
+int weight, lastWeightSent = 0;
+int t = 0;
 
 void setup()
 {
@@ -161,8 +161,24 @@ void loop()
 {   
     if (weight != round(getWeight()))
     {
+        t = millis();
         weight = round(getWeight());
+        Serial.print("loop(): ");
         Serial.println(weight);
         updateDisplay(weight, "");
+    }
+    else if (weight != 0)
+    {
+        // Stabilized?
+        if ((millis() - t > 2000) && (weight == round(getWeight())) && (lastWeightSent != weight))
+        {
+            t = millis();
+            lastWeightSent = weight;
+            Serial.print("loop(): Sending weight: ");
+            Serial.println(weight);
+            //connectMqtt();
+        }
+
+        //mqttClient.loop();
     }
 }
