@@ -198,7 +198,7 @@ void loop()
             DEBUG_PRINTLN(weight);
             publishState(weight);
         }
-
-        mqttClient.loop();
     }
+
+    mqttClient.loop();
 }
