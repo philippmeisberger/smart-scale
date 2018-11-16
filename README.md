@@ -1,5 +1,9 @@
 # Weighbridge using ESP8266 and Home Assistant
 
+## Configuration
+
+The firmware must be configured before flashing to ESP8266. Rename `src/Firmware/sketches/Weighbridge/config-sample.h` to `src/Firmware/sketches/Weighbridge/config.h` and change the values like desired.
+
 ## Example configuration for Home Assistant
 
 This example must be added to the `sensor` block of your configuration.
