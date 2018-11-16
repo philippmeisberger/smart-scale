@@ -57,7 +57,7 @@ void setupDisplay()
     
     display.clearDisplay();
     display.setTextColor(WHITE);
-    updateDisplay(0, "");
+    updateDisplay(weight, "");
 }
 
 void setupScale()
@@ -84,7 +84,7 @@ void setupWifi()
     // Wi-Fi not yet connected?
     while (WiFi.status() != WL_CONNECTED)
     {
-        updateStatus("Connecting...");
+        updateDisplay(weight, "Connecting...");
         DEBUG_PRINT(".");
         delay(500);
     }
@@ -92,7 +92,7 @@ void setupWifi()
     // Wi-Fi connection established
     DEBUG_PRINT("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
     DEBUG_PRINTLN(WiFi.localIP());
-    updateStatus("");
+    updateDisplay(weight, "");
 }
 
 void updateDisplay(const int consumed, const char* statusText)
@@ -114,11 +114,6 @@ void updateDisplay(const int consumed, const char* statusText)
     }
 
     // Show status
-    updateStatus(statusText);
-}
-
-void updateStatus(const char* statusText)
-{
     display.setTextSize(1);
     display.setCursor(0, 24);
     display.println(statusText);
@@ -135,12 +130,12 @@ void publishState(const int consumed)
         if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
         {
             DEBUG_PRINTLN("publishState(): Connected to MQTT broker");
-            updateStatus("");
+            updateDisplay(weight, "");
         }
         else
         {
             DEBUG_PRINTF("publishState(): Connection failed with error code %i. Try again...\n", mqttClient.state());
-            updateStatus("MQTT connection failed");
+            updateDisplay(weight, "MQTT connection failed");
 
             // Give up?
             if (mqttConnectionAttempts == 0)
