@@ -23,10 +23,11 @@ HX711_ADC hx711(D3, D8);
 
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
-int t = 0;
-
 // Current weight
 int weight = 0;
+
+// Timestamp of last weighing process
+int lastWeighingTime = 0;
 
 // Last published weight
 int lastWeightSent = 0;
@@ -176,26 +177,25 @@ float getWeight()
 }
 
 void loop()
-{   
+{
+    // Weight has changed
     if (weight != round(getWeight()))
     {
         // Show weight on display
-        t = millis();
+        lastWeighingTime = millis();
         weight = round(getWeight());
-        DEBUG_PRINT("loop(): ");
-        DEBUG_PRINTLN(weight);
+        DEBUG_PRINTF("loop(): %i\n", weight);
         updateDisplay(weight, "");
     }
     else if (weight != 0)
     {
         // Stabilized?
-        if ((millis() - t > HX711_STABILIZING_INTERVAL) && (weight == round(getWeight())) && (lastWeightSent != weight))
+        if ((millis() - lastWeighingTime > HX711_STABILIZING_INTERVAL) && (weight == round(getWeight())) && (lastWeightSent != weight))
         {
             // Publish weight
-            t = millis();
+            lastWeighingTime = millis();
             lastWeightSent = weight;
-            DEBUG_PRINT("loop(): Publishing weight: ");
-            DEBUG_PRINTLN(weight);
+            DEBUG_PRINTF("loop(): Publishing weight: %i\n", weight);
             publishState(weight);
         }
     }
