@@ -69,7 +69,7 @@ void setupScale()
 
 void setupWifi()
 {
-    Serial.printf("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
+    DEBUG_PRINTF("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
 
     // Do not store Wi-Fi config in SDK flash area
     WiFi.persistent(false);
@@ -84,7 +84,7 @@ void setupWifi()
     while (WiFi.status() != WL_CONNECTED)
     {
         updateStatus("Connecting...");
-        Serial.print(".");
+        DEBUG_PRINT(".");
         delay(500);
     }
 
@@ -133,7 +133,7 @@ void publishState(const int consumed)
         
         if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
         {
-            Serial.println("publishState(): Connected to MQTT broker");
+            DEBUG_PRINTLN("publishState(): Connected to MQTT broker");
             updateStatus("");
         }
         else
