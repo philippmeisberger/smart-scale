@@ -6,12 +6,12 @@
 #include <HX711_ADC.h>
 
 #include "config.h"
+#include "logging.h"
 
-#define FIRMWARE_VERSION "0.1"
+#define FIRMWARE_VERSION "0.2"
 
 WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 // Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
@@ -20,6 +20,8 @@ Adafruit_SSD1306 display(OLED_RESET);
 // Connect black to E+, red to E-, green to A+, white to A-
 // Connect SCK to D8, DT to D3
 HX711_ADC hx711(D3, D8);
+
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 int t = 0;
 
@@ -34,9 +36,11 @@ int mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
 
 void setup()
 {
+  #ifdef DEBUG
     Serial.begin(115200);
     delay(250);
     Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
+  #endif
     setupDisplay();
     setupScale();
     setupWifi();
@@ -45,7 +49,7 @@ void setup()
 
 void setupDisplay()
 {
-    Serial.println("setupDisplay(): Initializing ...");
+    DEBUG_PRINTLN("setupDisplay(): Initializing...");
 
     // initialize with the I2C addr 0x3C (for the 128x32)
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
@@ -57,10 +61,10 @@ void setupDisplay()
 
 void setupScale()
 {
-  Serial.println("setupScale(): Initializing ...");
-  hx711.begin();
-  hx711.start(0);
-  hx711.setCalFactor(392.0);
+    DEBUG_PRINTLN("setupScale(): Initializing...");
+    hx711.begin();
+    hx711.start(0);
+    hx711.setCalFactor(392.0);  // Calibrated for 5kg
 }
 
 void setupWifi()
@@ -79,14 +83,14 @@ void setupWifi()
     // Wi-Fi not yet connected?
     while (WiFi.status() != WL_CONNECTED)
     {
-        updateStatus("Connecting ...");
+        updateStatus("Connecting...");
         Serial.print(".");
         delay(500);
     }
 
     // Wi-Fi connection established
-    Serial.print("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
-    Serial.println(WiFi.localIP());
+    DEBUG_PRINT("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
+    DEBUG_PRINTLN(WiFi.localIP());
     updateStatus("");
 }
 
@@ -125,7 +129,7 @@ void publishState(const int consumed)
     // Connect MQTT broker
     while (!mqttClient.connected())
     {
-        Serial.printf("publishState(): Connecting to MQTT broker '%s:%i'...", MQTT_SERVER, MQTT_PORT);
+        DEBUG_PRINTF("publishState(): Connecting to MQTT broker '%s: %i'...\n", MQTT_SERVER, MQTT_PORT);
         
         if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
         {
@@ -134,12 +138,13 @@ void publishState(const int consumed)
         }
         else
         {
-            Serial.printf("publishState(): Connection failed with error code %i. Try again...\n", mqttClient.state());
+            DEBUG_PRINTF("publishState(): Connection failed with error code %i. Try again...\n", mqttClient.state());
             updateStatus("MQTT connection failed");
 
             // Give up?
             if (mqttConnectionAttempts == 0)
             {
+                DEBUG_PRINTLN("publishState(): Maximum connection attempts exceeded... Giving up");
                 mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
                 return;
             }
@@ -160,7 +165,7 @@ void publishState(const int consumed)
     char message[weight.measureLength() + 1];
     weight.printTo(message, sizeof(message));
 
-    Serial.printf("publishState(): Publish message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
+    DEBUG_PRINTF("publishState(): Publishing message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
     mqttClient.publish(MQTT_CHANNEL_STATE, message);
 }
 
@@ -177,8 +182,8 @@ void loop()
         // Show weight on display
         t = millis();
         weight = round(getWeight());
-        Serial.print("loop(): ");
-        Serial.println(weight);
+        DEBUG_PRINT("loop(): ");
+        DEBUG_PRINTLN(weight);
         updateDisplay(weight, "");
     }
     else if (weight != 0)
@@ -189,8 +194,8 @@ void loop()
             // Publish weight
             t = millis();
             lastWeightSent = weight;
-            Serial.print("loop(): Publishing weight: ");
-            Serial.println(weight);
+            DEBUG_PRINT("loop(): Publishing weight: ");
+            DEBUG_PRINTLN(weight);
             publishState(weight);
         }
 
