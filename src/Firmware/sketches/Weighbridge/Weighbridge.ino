@@ -1,35 +1,61 @@
-#include <ESP8266WiFi.h>
-#include <PubSubClient.h>
-#include <ArduinoJson.h>
+//#include <ESP8266WiFi.h>
+//#include <PubSubClient.h>
+//#include <ArduinoJson.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-//#include <HX711_ADC.h>
+#include <HX711_ADC.h>
 
 #include "config.h"
 
 #define FIRMWARE_VERSION "0.1"
 
-WiFiClient wifiClient = WiFiClient();
+/*WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);*/
 
 // Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
 Adafruit_SSD1306 display(OLED_RESET);
+
+// Connect black to E+, red to E-, green to A+, white to A-
+// Connect SCK to D8, DT to D3
+HX711_ADC hx711(D3, D8);
+
+int weight = 0;
+//int t = millis();
 
 void setup()
 {
     Serial.begin(115200);
     delay(250);
     Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
-  
-    // initialize with the I2C addr 0x3C (for the 128x32)
-    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-
-    setupWifi();
-    mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
+    setupDisplay();
+    setupScale();
+    /*setupWifi();
+    mqttClient.setServer(MQTT_SERVER, MQTT_PORT);*/
 }
 
-void setupWifi()
+void setupDisplay()
+{
+    Serial.println("setupDisplay(): Initializing ...");
+
+    // initialize with the I2C addr 0x3C (for the 128x32)
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    
+    display.clearDisplay();
+    display.setTextColor(WHITE);
+    updateDisplay(0, "");
+}
+
+void setupScale()
+{
+  Serial.println("setupScale(): Initializing ...");
+  hx711.begin();
+  hx711.start(0);
+  hx711.setCalFactor(392.0);
+}
+
+/*void setupWifi()
 {
     Serial.printf("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
 
@@ -45,7 +71,7 @@ void setupWifi()
     // Wi-Fi not yet connected?
     while (WiFi.status() != WL_CONNECTED)
     {
-        updateDisplay(250, "Connecting ...");
+        updateStatus("Connecting ...");
         Serial.print(".");
         delay(500);
     }
@@ -53,7 +79,7 @@ void setupWifi()
     // Wi-Fi connection established
     Serial.print("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
     Serial.println(WiFi.localIP());
-    updateDisplay(250, "");
+    updateStatus("");
 }
 
 void connectMqtt()
@@ -67,47 +93,50 @@ void connectMqtt()
             Serial.println("connect(): Connected to MQTT broker");
 
             // Publish initial state
-            publishState(250);
+            publishState(0);
+            updateStatus("");
         }
         else
         {
             Serial.printf("connect(): Connection failed with error code %i. Try again...\n", mqttClient.state());
-            updateDisplay(250, "MQTT connection failed");
+            updateStatus("MQTT connection failed");
             delay(2000);
         }
     }
-}
+}*/
 
 void updateDisplay(const int consumed, const char* statusText)
 {
     display.clearDisplay();
-    display.setTextColor(WHITE);
 
     // Show consumption
     display.setTextSize(3);
     display.setCursor(0, 0);
 
-    // Consumed more than 1000ml
+    // More than 1000
     if (consumed >= 1000)
     {
-        display.print(String(consumed / 1000) + "l");
+        display.println(String((float)consumed / 1000) + "kg");
     }
     else
     {
-        display.print(String(consumed) + "ml");
+        display.println(String(consumed) + "g");
     }
-    
+
     // Show status
+    updateStatus(statusText);
+}
+
+void updateStatus(const char* statusText)
+{
     display.setTextSize(1);
     display.setCursor(0, 24);
-    display.print(statusText);
-
+    display.println(statusText);
     display.display();
 }
 
-void publishState(const int consumed)
+/*void publishState(const int consumed)
 {
-    updateDisplay(consumed, "");
     StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
     JsonObject& weight = jsonBuffer.createObject();
 
@@ -120,11 +149,20 @@ void publishState(const int consumed)
 
     Serial.printf("publishState(): Publish message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
     mqttClient.publish(MQTT_CHANNEL_STATE, message);
+}*/
+
+float getWeight()
+{
+    hx711.update();
+    return hx711.getData();
 }
 
 void loop()
-{
-    // TODO: Calculate weight
-    connectMqtt();
-    mqttClient.loop();
+{   
+    if (weight != round(getWeight()))
+    {
+        weight = round(getWeight());
+        Serial.println(weight);
+        updateDisplay(weight, "");
+    }
 }
