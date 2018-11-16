@@ -63,8 +63,8 @@ void setupScale()
 {
     DEBUG_PRINTLN("setupScale(): Initializing...");
     hx711.begin();
-    hx711.start(0);
-    hx711.setCalFactor(392.0);  // Calibrated for 5kg
+    hx711.start(HX711_STARTUP_DELAY);
+    hx711.setCalFactor(HX711_CALIBRATION_FACTOR);
 }
 
 void setupWifi()
@@ -189,7 +189,7 @@ void loop()
     else if (weight != 0)
     {
         // Stabilized?
-        if ((millis() - t > 2000) && (weight == round(getWeight())) && (lastWeightSent != weight))
+        if ((millis() - t > HX711_STABILIZING_INTERVAL) && (weight == round(getWeight())) && (lastWeightSent != weight))
         {
             // Publish weight
             t = millis();

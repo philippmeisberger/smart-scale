@@ -3,8 +3,12 @@
 #define WIFI_SSID                   ""
 #define WIFI_PASSWORD               ""
 
+#define HX711_STARTUP_DELAY         0
+#define HX711_CALIBRATION_FACTOR    392.0   // 5kg sensor
+#define HX711_STABILIZING_INTERVAL  2000
+
 #define MQTT_CLIENTID               "weighbridge"
-#define MQTT_SERVER                 ""
+#define MQTT_SERVER                 "hassio.local"
 #define MQTT_PORT                   1883
 #define MQTT_USERNAME               MQTT_CLIENTID
 #define MQTT_PASSWORD               ""
