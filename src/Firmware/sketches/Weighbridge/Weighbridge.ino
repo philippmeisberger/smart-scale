@@ -29,6 +29,9 @@ int weight = 0;
 // Timestamp of last weighing process
 int lastWeighingTime = 0;
 
+// Display is currently in standby mode
+bool displayStandby = false;
+
 // Last published weight
 int lastWeightSent = 0;
 
@@ -47,6 +50,7 @@ void setup()
     setupWifi();
     mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
     updateDisplay(weight, "");
+    lastWeighingTime = millis();
 }
 
 void setupDisplay()
@@ -58,6 +62,7 @@ void setupDisplay()
     
     display.clearDisplay();
     display.setTextColor(WHITE);
+    display.display();
 }
 
 void setupScale()
@@ -189,6 +194,7 @@ void loop()
         weight = round(getWeight());
         DEBUG_PRINTF("loop(): %i\n", weight);
         updateDisplay(weight, "");
+        displayStandby = false;
     }
     else if (weight != 0)
     {
@@ -200,8 +206,20 @@ void loop()
             lastWeightSent = weight;
             DEBUG_PRINTF("loop(): Publishing weight: %i\n", weight);
             publishState(weight);
+            displayStandby = false;
         }
     }
+
+  #if LCD_TIMEOUT > 0
+    // Turn off display after some time
+    if (!displayStandby && (millis() - lastWeighingTime > LCD_TIMEOUT))
+    {
+        DEBUG_PRINTLN("Turning off display");
+        display.clearDisplay();
+        display.display();
+        displayStandby = true;
+    }
+  #endif
 
     mqttClient.loop();
 }

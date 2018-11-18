@@ -7,6 +7,8 @@
 #define HX711_CALIBRATION_FACTOR    392.0   // 5kg sensor
 #define HX711_STABILIZING_INTERVAL  2000
 
+#define LCD_TIMEOUT                 30000
+
 #define MQTT_CLIENTID               "weighbridge"
 #define MQTT_SERVER                 "hassio.local"
 #define MQTT_PORT                   1883
