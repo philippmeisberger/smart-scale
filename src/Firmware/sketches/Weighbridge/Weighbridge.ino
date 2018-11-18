@@ -46,6 +46,7 @@ void setup()
     setupScale();
     setupWifi();
     mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
+    updateDisplay(weight, "");
 }
 
 void setupDisplay()
@@ -57,7 +58,6 @@ void setupDisplay()
     
     display.clearDisplay();
     display.setTextColor(WHITE);
-    updateDisplay(weight, "");
 }
 
 void setupScale()
@@ -82,9 +82,11 @@ void setupWifi()
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     // Wi-Fi not yet connected?
+    // TODO: Maybe give up after several attempts 
     while (WiFi.status() != WL_CONNECTED)
     {
-        updateDisplay(weight, "Connecting...");
+        // TODO: Maybe show splash screen
+        updateDisplay("", "Connecting...");
         DEBUG_PRINT(".");
         delay(500);
     }
@@ -92,28 +94,34 @@ void setupWifi()
     // Wi-Fi connection established
     DEBUG_PRINT("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
     DEBUG_PRINTLN(WiFi.localIP());
-    updateDisplay(weight, "");
 }
 
 void updateDisplay(const int consumed, const char* statusText)
 {
-    display.clearDisplay();
-
-    // Show consumption
-    display.setTextSize(3);
-    display.setCursor(0, 0);
-
-    // More than 1000
+    String text;
+    
     if (consumed >= 1000)
     {
-        display.println(String((float)consumed / 1000) + "kg");
+        text = String((float)consumed / 1000) + "kg";
     }
     else
     {
-        display.println(String(consumed) + "g");
+        text = String(consumed) + "g";
     }
 
-    // Show status
+    updateDisplay(text.c_str(), statusText);
+}
+
+void updateDisplay(const char* text, const char* statusText)
+{
+    display.clearDisplay();
+
+    // Show text in medium font size
+    display.setTextSize(3);
+    display.setCursor(0, 0);
+    display.println(text);
+
+    // Show status in small font size
     display.setTextSize(1);
     display.setCursor(0, 24);
     display.println(statusText);
