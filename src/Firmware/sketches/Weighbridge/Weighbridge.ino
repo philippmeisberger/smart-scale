@@ -197,7 +197,7 @@ void publishState(const int weighed, const int consumed)
             }
 
             mqttConnectionAttempts--;
-            delay(2000);
+            delay(MQTT_CONNECTION_ATTEMPT_DELAY);
         }
     }
 
