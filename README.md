@@ -10,12 +10,18 @@ This example must be added to the `sensor` block of your configuration.
 
       - platform: mqtt
         state_topic: "/weighbridge/api/1/state/"
-        name: "Total water"
-        unit_of_measurement: 'ml'
-        value_template: "{{ value_json.total }}"
+        name: "Weight"
+        unit_of_measurement: 'g'
+        value_template: "{{ value_json.weight }}"
 
       - platform: mqtt
         state_topic: "/weighbridge/api/1/state/"
-        name: "Actual water"
+        name: "Actual water consumption"
         unit_of_measurement: 'ml'
-        value_template: "{{ value_json.actual }}"
+        value_template: "{{ value_json.consumed }}"
+
+      - platform: mqtt
+        state_topic: "/weighbridge/api/1/state/"
+        name: "Total water consumption"
+        unit_of_measurement: 'ml'
+        value_template: "{{ value_json.consumption }}"

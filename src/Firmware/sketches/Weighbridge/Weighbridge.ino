@@ -24,7 +24,7 @@ HX711_ADC hx711(D3, D8);
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 // Current weight
-int weight = 0;
+int currentWeight = 0;
 
 // Timestamp of last weighing process
 int lastWeighingTime = 0;
@@ -35,8 +35,23 @@ bool displayStandby = false;
 // Last published weight
 int lastWeightSent = 0;
 
+// Overall consumption
+int consumption = 0;
+
 // Number of attempts to connect to MQTT broker
 int mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
+
+enum WeighingMode
+{
+    // Show mass in g/kg
+    weight,
+
+    // Show water consumption in ml/l
+    volume
+};
+
+// Weight per default
+WeighingMode weighingMode = weight;
 
 void setup()
 {
@@ -49,7 +64,7 @@ void setup()
     setupScale();
     setupWifi();
     mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-    updateDisplay(weight, "");
+    updateDisplay(currentWeight, "");
     lastWeighingTime = millis();
 }
 
@@ -59,7 +74,6 @@ void setupDisplay()
 
     // initialize with the I2C addr 0x3C (for the 128x32)
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-    
     display.clearDisplay();
     display.setTextColor(WHITE);
     display.display();
@@ -87,7 +101,7 @@ void setupWifi()
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     // Wi-Fi not yet connected?
-    // TODO: Maybe give up after several attempts 
+    // TODO: Maybe give up after several attempts
     while (WiFi.status() != WL_CONNECTED)
     {
         // TODO: Maybe show splash screen
@@ -101,17 +115,38 @@ void setupWifi()
     DEBUG_PRINTLN(WiFi.localIP());
 }
 
-void updateDisplay(const int consumed, const char* statusText)
+void updateDisplay(const int value, const char* statusText)
 {
     String text;
-    
-    if (consumed >= 1000)
+
+    switch(weighingMode)
     {
-        text = String((float)consumed / 1000) + "kg";
-    }
-    else
-    {
-        text = String(consumed) + "g";
+        case weight:
+            if (value >= 1000)
+            {
+                text = String((float)value / 1000) + "kg";
+            }
+            else
+            {
+                text = String(value) + "g";
+            }
+
+            break;
+
+        case volume:
+            if (value >= 1000)
+            {
+                text = String((float)value / 1000) + "l";
+            }
+            else
+            {
+                text = String(value) + "ml";
+            }
+
+            break;
+
+        default:
+            return;
     }
 
     updateDisplay(text.c_str(), statusText);
@@ -133,22 +168,25 @@ void updateDisplay(const char* text, const char* statusText)
     display.display();
 }
 
-void publishState(const int consumed)
+void publishState(const int weighed, const int consumed)
 {
+    DEBUG_PRINTF("publishState(): Publishing state (weighed %i, consumed %i)\n", weighed, consumed);
+    consumption += -consumed;
+
     // Connect MQTT broker
     while (!mqttClient.connected())
     {
         DEBUG_PRINTF("publishState(): Connecting to MQTT broker '%s: %i'...\n", MQTT_SERVER, MQTT_PORT);
-        
+
         if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
         {
             DEBUG_PRINTLN("publishState(): Connected to MQTT broker");
-            updateDisplay(weight, "");
+            updateDisplay((weighingMode == weight)? weighed : consumption, "");
         }
         else
         {
-            DEBUG_PRINTF("publishState(): Connection failed with error code %i. Try again...\n", mqttClient.state());
-            updateDisplay(weight, "MQTT connection failed");
+            DEBUG_PRINTF("publishState(): Connection failed with error code %i\n", mqttClient.state());
+            updateDisplay((weighingMode == weight)? weighed : consumption, "Publishing failed");
 
             // Give up?
             if (mqttConnectionAttempts == 0)
@@ -157,7 +195,7 @@ void publishState(const int consumed)
                 mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
                 return;
             }
-                
+
             mqttConnectionAttempts--;
             delay(2000);
         }
@@ -165,14 +203,14 @@ void publishState(const int consumed)
 
     // Send weight
     StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-    JsonObject& weight = jsonBuffer.createObject();
+    JsonObject& json = jsonBuffer.createObject();
 
-    // milli liters
-    weight["total"] = 0;
-    weight["actual"] = consumed;
+    json["weight"] = weighed;
+    json["consumed"] = consumed;
+    json["consumption"] = consumption;
 
-    char message[weight.measureLength() + 1];
-    weight.printTo(message, sizeof(message));
+    char message[json.measureLength() + 1];
+    json.printTo(message, sizeof(message));
 
     DEBUG_PRINTF("publishState(): Publishing message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
     mqttClient.publish(MQTT_CHANNEL_STATE, message);
@@ -187,25 +225,24 @@ float getWeight()
 void loop()
 {
     // Weight has changed
-    if (weight != round(getWeight()))
+    if (currentWeight != round(getWeight()))
     {
         // Show weight on display
         lastWeighingTime = millis();
-        weight = round(getWeight());
-        DEBUG_PRINTF("loop(): %i\n", weight);
-        updateDisplay(weight, "");
+        currentWeight = round(getWeight());
+        DEBUG_PRINTF("loop(): %i\n", currentWeight);
+        updateDisplay((weighingMode == weight)? currentWeight : consumption, "");
         displayStandby = false;
     }
-    else if (weight != 0)
+    else if (currentWeight != 0)
     {
         // Stabilized?
-        if ((millis() - lastWeighingTime > HX711_STABILIZING_INTERVAL) && (weight == round(getWeight())) && (lastWeightSent != weight))
+        if ((millis() - lastWeighingTime > HX711_STABILIZING_INTERVAL) && (currentWeight == round(getWeight())) && (lastWeightSent != currentWeight))
         {
-            // Publish weight
+            // Publish state
             lastWeighingTime = millis();
-            lastWeightSent = weight;
-            DEBUG_PRINTF("loop(): Publishing weight: %i\n", weight);
-            publishState(weight);
+            publishState(currentWeight, (lastWeightSent == 0)? 0 : currentWeight - lastWeightSent);
+            lastWeightSent = currentWeight;
             displayStandby = false;
         }
     }
