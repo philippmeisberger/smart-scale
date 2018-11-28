@@ -89,6 +89,10 @@ void setupScale()
 
 void setupWifi()
 {
+    // Stay offline
+    if ((WIFI_SSID == "") || (WIFI_PASSWORD == ""))
+        return;
+
     DEBUG_PRINTF("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
 
     // Do not store Wi-Fi config in SDK flash area
@@ -168,10 +172,26 @@ void updateDisplay(const char* text, const char* statusText)
     display.display();
 }
 
-void publishState(const int weighed, const int consumed)
+void updateStatus(const char* statusText)
 {
-    DEBUG_PRINTF("publishState(): Publishing state (weighed %i, consumed %i)\n", weighed, consumed);
+    updateDisplay((weighingMode == weight)? currentWeight : consumption, statusText);
+}
+
+void publishState(const int consumed)
+{
+    DEBUG_PRINTF("publishState(): Publishing state (consumed %i)\n", consumed);
     consumption += -consumed;
+    
+    // Offline
+    if ((WIFI_SSID == "") || (WIFI_PASSWORD == ""))
+    {
+        DEBUG_PRINTLN("publishState(): Not publishing in offline mode");
+        lastWeightSent = currentWeight;
+        updateStatus("Offline");
+        return;
+    }
+    
+    updateStatus("");
 
     // Connect MQTT broker
     while (!mqttClient.connected())
@@ -181,12 +201,11 @@ void publishState(const int weighed, const int consumed)
         if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
         {
             DEBUG_PRINTLN("publishState(): Connected to MQTT broker");
-            updateDisplay((weighingMode == weight)? weighed : consumption, "");
         }
         else
         {
             DEBUG_PRINTF("publishState(): Connection failed with error code %i\n", mqttClient.state());
-            updateDisplay((weighingMode == weight)? weighed : consumption, "Publishing failed");
+            updateStatus("Publishing failed");
 
             // Give up?
             if (mqttConnectionAttempts == 0)
@@ -205,7 +224,6 @@ void publishState(const int weighed, const int consumed)
     StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
 
-    json["weight"] = weighed;
     json["consumed"] = consumed;
     json["consumption"] = consumption;
 
@@ -214,6 +232,7 @@ void publishState(const int weighed, const int consumed)
 
     DEBUG_PRINTF("publishState(): Publishing message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
     mqttClient.publish(MQTT_CHANNEL_STATE, message);
+    lastWeightSent = currentWeight;
 }
 
 float getWeight()
@@ -241,8 +260,17 @@ void loop()
         {
             // Publish state
             lastWeighingTime = millis();
-            publishState(currentWeight, (lastWeightSent == 0)? 0 : currentWeight - lastWeightSent);
-            lastWeightSent = currentWeight;
+
+            // Only publish volume
+            if (weighingMode == volume)
+            {
+                publishState((lastWeightSent == 0)? 0 : currentWeight - lastWeightSent);
+            }
+            else
+            {
+                lastWeightSent = currentWeight;
+            }
+
             displayStandby = false;
         }
     }
