@@ -1,5 +1,13 @@
 # Weighbridge using ESP8266 and Home Assistant
 
+## Dependencies
+
+* ArduinoJson
+* Adafruit GFX Library
+* Adafruit SSD1306
+* HX711_ADC
+* PubSubClient
+
 ## Configuration
 
 The firmware must be configured before flashing to ESP8266. Rename `src/Firmware/sketches/Weighbridge/config-sample.h` to `src/Firmware/sketches/Weighbridge/config.h` and change the values like desired.
