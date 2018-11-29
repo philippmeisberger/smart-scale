@@ -9,6 +9,7 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 
+// Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
@@ -73,6 +74,7 @@ namespace MAIN_MODE{
 void setupDisplay() {
   DEBUG_PRINTLN("setupDisplay(): Initializing...");
 
+  // initialize with the I2C addr 0x3C (for the 128x32)
   display.begin(SSD1306_SWITCHCAPVCC, 0x3c);
 
   //display.clearDisplay();
