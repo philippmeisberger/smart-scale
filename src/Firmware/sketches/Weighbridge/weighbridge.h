@@ -9,8 +9,6 @@
 #include "../mode.h"
 #include "config.h"
 
-#define FIRMWARE_VERSION "0.2"
-
 WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
 
@@ -48,7 +46,6 @@ namespace WEIGHBRIDGE
   int consumption               = 0;                        // Overall consumption
   int mqttConnectionAttempts    = MQTT_CONNECTION_ATTEMPTS; // Number of attempts to connect to MQTT broker
   bool displayStandby           = false;                    // Display is currently in standby mode
-
   WeighingMode weighingMode     = weight;                   // Weight per default
 
   void publishState(const int consumed)

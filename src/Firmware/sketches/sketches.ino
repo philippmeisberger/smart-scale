@@ -1,10 +1,16 @@
-#include <Adafruit_GFX.h>
 #include <Wire.h>
+#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+
 #include "logging.h"
 #include "mode.h"
 #include "SnakeMode/snake_mode.h"
 #include "Weighbridge/weighbridge.h"
+
+#define FIRMWARE_VERSION "0.5"
+
+// Enable debug messages on serial
+#define DEBUG
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -83,8 +89,11 @@ void setupDisplay() {
 }
 
 void setup() {
+#ifdef DEBUG
   Serial.begin(115200);
   delay(250);
+  Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
+#endif
   setupDisplay();
   // randomSeed(analogRead(0));
 
