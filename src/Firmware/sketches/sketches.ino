@@ -1,9 +1,10 @@
 #include <Adafruit_GFX.h>
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
-#include "utils.h"
+#include "logging.h"
 #include "mode.h"
 #include "SnakeMode/snake_mode.h"
+#include "Weighbridge/weighbridge.h"
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -88,6 +89,7 @@ void setup() {
   // INCLUDE PACKAGES:
   selected_mode = 0;
   MAIN_MODE::setup();
+  WEIGHBRIDGE::setup();
   SNAKE_MODE::setup();
 }
 

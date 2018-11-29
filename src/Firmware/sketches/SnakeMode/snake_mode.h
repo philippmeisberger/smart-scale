@@ -1,4 +1,4 @@
-#include "../utils.h"
+#include "../logging.h"
 #include "../mode.h"
 
 extern Adafruit_SSD1306 display;

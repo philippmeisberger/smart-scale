@@ -5,40 +5,20 @@
 #include <Adafruit_SSD1306.h>
 #include <HX711_ADC.h>
 
-#include "../utils.h"
+#include "../logging.h"
 #include "../mode.h"
 
 #include "config.h"
-#include "logging.h"
 
 #define FIRMWARE_VERSION "0.2"
 
 WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
 
-// Connect SCL to D1 and SDA to D2
-#define OLED_RESET 0
-Adafruit_SSD1306 display(OLED_RESET);
-
 // Connect black to E+, red to E-, green to A+, white to A-
 // Connect SCK to D8, DT to D3
 HX711_ADC hx711(D3, D8);
 
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
-
-
-//void setup()
-//{
-//  #ifdef DEBUG
-//    Serial.begin(115200);
-//    delay(250);
-//    Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
-//  #endif
-//    setupDisplay();
-//    setupScale();
-//    setupWifi();
-//
-//}
 
 // /////////////////////
 // GLOBALS:
@@ -51,6 +31,12 @@ extern int selected_mode;
 
 namespace WEIGHBRIDGE{
 
+  const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
+
+  float getWeight();
+  void updateStatus(const char* statusText);
+  void updateDisplay(const char* text, const char* statusText);
+  void publishState(const int value);
 
   enum WeighingMode{ weight, volume }; // Show mass in g/kg // Show water consumption in ml/l
 
@@ -106,6 +92,7 @@ namespace WEIGHBRIDGE{
           }
       }
 
+      /* FIXME: error: 'StaticJsonBuffer' was not declared in this scope
       // Send weight
       StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
       JsonObject& json = jsonBuffer.createObject();
@@ -118,11 +105,14 @@ namespace WEIGHBRIDGE{
 
       DEBUG_PRINTF("publishState(): Publishing message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
       mqttClient.publish(MQTT_CHANNEL_STATE, message);
+       */
       lastWeightSent = currentWeight;
-  }
+   }
 
   String humanize(const int value){
-      const String units[2] = weighingMode == weight ? {'g', 'kg'} : {'ml', 'l'};
+      const String unit_volumes[2] = {"ml", "l"};
+      const String unit_weights[2] = {"g", "kg"};
+      const String *units = weighingMode == weight ? &unit_weights[0] : &unit_volumes[0];
       if(value >= 1000) return String(value/1000.0) + units[1];
       return String(value) + units[0];
   }
@@ -149,6 +139,11 @@ namespace WEIGHBRIDGE{
       display.println(statusText);
       display.display();
   }
+
+  inline void updateDisplay(const char* text, const String str){ updateDisplay(text, str.c_str()); }
+  inline void updateDisplay(const String text, const char* str){ updateDisplay(text.c_str(), str); }
+  inline void updateDisplay(const String text, const String str){ updateDisplay(text.c_str(), str.c_str()); }
+
   void updateStatus(const char* statusText){
       updateDisplay(humanize(getValue()), statusText);
   }
