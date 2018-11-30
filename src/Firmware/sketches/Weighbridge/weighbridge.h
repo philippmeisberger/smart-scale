@@ -170,6 +170,7 @@ namespace WEIGHBRIDGE
     if (currentWeight != weight)
     {
       currentWeight = weight;
+      lastWeighingTime = millis();
       updateStatus("");
       displayStandby = false;
     }
