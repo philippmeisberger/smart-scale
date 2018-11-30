@@ -17,9 +17,6 @@ PubSubClient mqttClient = PubSubClient(wifiClient);
 HX711_ADC hx711(D3, D8);
 
 extern Adafruit_SSD1306 display;
-extern mode modes[];
-extern int next_mode;
-extern int selected_mode;
 
 
 namespace WEIGHBRIDGE
@@ -249,7 +246,7 @@ namespace WEIGHBRIDGE
   void setup()
   {
     DEBUG_PRINTLN("setup(): Initializing weighbridge...");
-    modes[next_mode++] = mode(&start_mode, &update, (char *) "weighbridge");
+    addMode(&start_mode, &update, (char *) "weighbridge");
     setupScale();
     setupWifi();
     mqttClient.setServer(MQTT_SERVER, MQTT_PORT);

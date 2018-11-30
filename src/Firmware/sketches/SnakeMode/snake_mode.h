@@ -3,8 +3,6 @@
 #include "../mode.h"
 
 extern Adafruit_SSD1306 display;
-extern mode modes[];
-extern int next_mode;
 extern int selected_mode;
 
 namespace SNAKE_MODE {
@@ -212,7 +210,7 @@ namespace SNAKE_MODE {
   }
 
   void setup() {
-    modes[next_mode++] = mode(&start_mode, &update, (char *) "snake");
+    addMode(&start_mode, &update, (char *) "snake");
   }
 
 }

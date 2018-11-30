@@ -14,11 +14,7 @@
 #define OLED_RESET 0
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
-extern mode modes[];
-extern int next_mode;
-extern int selected_mode;
-
-
+// TODO: No menu should be provided
 namespace MAIN_MODE{
 
   int _selected = 0;
@@ -62,7 +58,7 @@ namespace MAIN_MODE{
   }
 
   void setup(){
-    modes[next_mode++] = mode(&start_mode, &update, (char *) "self");
+    addMode(&start_mode, &update, (char *) "self");
   }
 
 }
