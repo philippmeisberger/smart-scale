@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#include "config.h"
 #include "logging.h"
 #include "mode.h"
 #include "SnakeMode/snake_mode.h"
@@ -9,15 +10,9 @@
 
 #define FIRMWARE_VERSION "0.5"
 
-// Enable debug messages on serial
-#define DEBUG
-
-#define SCREEN_WIDTH 128 // OLED display width, in pixels
-#define SCREEN_HEIGHT 64 // OLED display height, in pixels
-
 // Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
 extern mode modes[];
 extern int next_mode;

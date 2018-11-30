@@ -5,9 +5,9 @@
 #include <Adafruit_SSD1306.h>
 #include <HX711_ADC.h>
 
+#include "../config.h"
 #include "../logging.h"
 #include "../mode.h"
-#include "config.h"
 
 WiFiClient wifiClient = WiFiClient();
 PubSubClient mqttClient = PubSubClient(wifiClient);
@@ -197,9 +197,9 @@ namespace WEIGHBRIDGE
       }
     }
 
-  #if LCD_TIMEOUT > 0
+  #if OLED_TIMEOUT > 0
     // Turn off display after some time
-    if (!displayStandby && (millis() - lastWeighingTime > LCD_TIMEOUT))
+    if (!displayStandby && (millis() - lastWeighingTime > OLED_TIMEOUT))
     {
       DEBUG_PRINTLN("Turning off display");
       display.clearDisplay();

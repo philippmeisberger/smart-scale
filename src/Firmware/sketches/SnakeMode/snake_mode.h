@@ -1,3 +1,4 @@
+#include "../config.h"
 #include "../logging.h"
 #include "../mode.h"
 
