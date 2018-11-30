@@ -46,7 +46,7 @@ namespace WEIGHBRIDGE
   int consumption               = 0;                        // Overall consumption
   int mqttConnectionAttempts    = MQTT_CONNECTION_ATTEMPTS; // Number of attempts to connect to MQTT broker
   bool displayStandby           = false;                    // Display is currently in standby mode
-  WeighingMode weighingMode     = weight;                   // Weight per default
+  WeighingMode weighingMode     = weight;                   // Show weight per default
 
   void publishState(const int consumed)
   {
@@ -111,7 +111,7 @@ namespace WEIGHBRIDGE
   {
     const String unit_volumes[2] = {"ml", "l"};
     const String unit_weights[2] = {"g", "kg"};
-    const String *units = weighingMode == weight ? &unit_weights[0] : &unit_volumes[0];
+    const String *units = (weighingMode == weight)? &unit_weights[0] : &unit_volumes[0];
 
     if (value >= 1000)
     {
@@ -125,12 +125,6 @@ namespace WEIGHBRIDGE
   {
     hx711.update();
     return hx711.getData();
-  }
-
-  // returns the weighingMode specific value
-  int getValue()
-  {
-    return (weighingMode == weight)? currentWeight : consumption;
   }
 
   void updateDisplay(const char* text, const char* statusText)
@@ -155,7 +149,7 @@ namespace WEIGHBRIDGE
 
   void updateStatus(const char* statusText)
   {
-    updateDisplay(humanize(getValue()), statusText);
+    updateDisplay(humanize((weighingMode == weight)? currentWeight : consumption), statusText);
   }
 
   // this method is called, when this mode is activated from the menu
@@ -163,25 +157,22 @@ namespace WEIGHBRIDGE
   {
   }
 
-  void update_weight()
-  {
-    auto weight = round(getWeight());
-
-    if (currentWeight != weight)
-    {
-      currentWeight = weight;
-      lastWeighingTime = millis();
-      updateStatus("");
-      displayStandby = false;
-    }
-  }
-
   // this method is called in the loop() if this mode is active
   void update()
   {
     if (weighingMode == weight)
     {
-      update_weight();
+      int weight = round(getWeight());
+
+      // Weight has changed
+      if (currentWeight != weight)
+      {
+        DEBUG_PRINTLN(weight);
+        currentWeight = weight;
+        lastWeighingTime = millis();
+        updateStatus("");
+        displayStandby = false;
+      }
     }
     else
     {
@@ -257,6 +248,7 @@ namespace WEIGHBRIDGE
   // this method is called at the start of the ESP/Arduino
   void setup()
   {
+    DEBUG_PRINTLN("setup(): Initializing weighbridge...");
     modes[next_mode++] = mode(&start_mode, &update, (char *) "weighbridge");
     setupScale();
     setupWifi();
