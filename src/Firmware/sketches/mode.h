@@ -4,18 +4,18 @@
 struct mode {
     char *name;
     void (*setup)();
-    void (*update)();
+    void (*loop)();
 
-    mode() : setup(NULL), update(NULL), name(NULL){}
-    mode(void (*setup)(), void (*update)(), char* name) : setup(setup), update(update), name(name){}
+    mode() : setup(NULL), loop(NULL), name(NULL){}
+    mode(void (*setup)(), void (*loop)(), char* name) : setup(setup), loop(loop), name(name){}
 };
 
 mode modes[10];
 int next_mode = 0;
 int selected_mode = 0;
 
-inline void addMode(void (*start_mode)(), void (*update)(), char* name) {
-  modes[next_mode++] = mode(start_mode, update, name);
+inline void addMode(void (*start_mode)(), void (*loop)(), char* name) {
+  modes[next_mode++] = mode(start_mode, loop, name);
 }
 
 void switchMode(int newMode) {

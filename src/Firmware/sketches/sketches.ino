@@ -20,7 +20,7 @@ namespace MAIN_MODE{
   int _selected = 0;
   bool once = false;
 
-  void update() {
+  void loop() {
     if (Serial.available() > 0) {
       char in = Serial.read();
       if (in == 'w') _selected--;
@@ -57,8 +57,8 @@ namespace MAIN_MODE{
     once = false;
   }
 
-  void setup(){
-    addMode(&start_mode, &update, (char *) "self");
+  void setup() {
+    addMode(&start_mode, &loop, (char *) "self");
   }
 
 }
@@ -95,5 +95,5 @@ void setup() {
 }
 
 void loop() {
-  modes[selected_mode].update();
+  modes[selected_mode].loop();
 }

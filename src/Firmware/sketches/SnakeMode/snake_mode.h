@@ -191,7 +191,7 @@ namespace SNAKE_MODE {
 
   }
 
-  void update() {
+  void loop() {
     display.clearDisplay();
     DEBUG_PRINTLN("LOOP");
 
@@ -210,7 +210,7 @@ namespace SNAKE_MODE {
   }
 
   void setup() {
-    addMode(&start_mode, &update, (char *) "snake");
+    addMode(&start_mode, &loop, (char *) "snake");
   }
 
 }

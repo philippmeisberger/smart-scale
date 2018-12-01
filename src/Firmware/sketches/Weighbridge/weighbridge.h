@@ -61,7 +61,7 @@ namespace WEIGHBRIDGE
     hx711.setCalFactor(HX711_CALIBRATION_FACTOR);
   }
 
-  void update()
+  void loop()
   {
   #if OLED_TIMEOUT > 0
     // Turn off display after some time
@@ -114,7 +114,7 @@ namespace WEIGHBRIDGE
         displayStandby = false;
       }
 
-      WEIGHBRIDGE::update();
+      WEIGHBRIDGE::loop();
     }
   }
 
@@ -271,15 +271,13 @@ namespace WEIGHBRIDGE
         {
           // Publish state
           lastWeighingTime = millis();
-
-          // publishState((lastWeightSent == 0) ? 0 : currentWeight - lastWeightSent);
           publishState(currentWeight - lastWeightSent);
           displayStandby = false;
         }
       }
 
       mqttClient.loop();
-      WEIGHBRIDGE::update();
+      WEIGHBRIDGE::loop();
     }
   }
 
