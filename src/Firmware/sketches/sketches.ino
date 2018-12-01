@@ -88,9 +88,8 @@ void setup() {
   setupDisplay();
   // randomSeed(analogRead(0));
 
-  // INCLUDE PACKAGES:
-  selected_mode = 0;
-  MAIN_MODE::setup();
+  // Include all modes
+  //MAIN_MODE::setup();
   WEIGHBRIDGE::setup();
   SNAKE_MODE::setup();
 }

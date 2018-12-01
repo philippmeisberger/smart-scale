@@ -4,7 +4,7 @@
 #define WIFI_PASSWORD                 ""
 
 #define HX711_STARTUP_DELAY           0
-#define HX711_CALIBRATION_FACTOR      392.0   // 5kg sensor
+#define HX711_CALIBRATION_FACTOR      392.0  // 5kg sensor
 #define HX711_STABILIZING_INTERVAL    2000
 
 #define OLED_WIDTH                    128    // OLED display width in pixels
