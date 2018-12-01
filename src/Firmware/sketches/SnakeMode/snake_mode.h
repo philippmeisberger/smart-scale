@@ -3,7 +3,6 @@
 #include "../mode.h"
 
 extern Adafruit_SSD1306 display;
-extern int selected_mode;
 
 namespace SNAKE_MODE {
 
@@ -206,7 +205,8 @@ namespace SNAKE_MODE {
     }
 
     game();
-    selected_mode = 0;
+    delay(3000);
+    switchMode(0);
   }
 
   void setup() {
