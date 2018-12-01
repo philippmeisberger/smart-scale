@@ -94,8 +94,8 @@ namespace SNAKE_MODE {
   }
 
   void game(){
-    int width = 128 / 4;
-    int height = 64 / 4;
+    int width = OLED_WIDTH / 4;
+    int height = OLED_HEIGHT / 4;
 
     coord head = coord(width/2 +2, height/2);
 
@@ -200,7 +200,7 @@ namespace SNAKE_MODE {
     display.setCursor(0, 0);
     display.println("loading");
 
-    for (int i = 0; i < 128; ++i) {
+    for (int i = 0; i < OLED_WIDTH; ++i) {
       display.drawPixel(i, 16, WHITE);
       if (i % 10 == 0) display.display();
     }
