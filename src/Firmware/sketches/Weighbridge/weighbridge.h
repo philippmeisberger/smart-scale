@@ -96,6 +96,7 @@ namespace WEIGHBRIDGE
 
     void setup()
     {
+      DEBUG_PRINTLN("setup(): WEIGHT");
       updateDisplay(humanize(currentWeight), "");
       lastWeighingTime = millis();
     }
@@ -245,6 +246,7 @@ namespace WEIGHBRIDGE
 
     void setup()
     {
+      DEBUG_PRINTLN("setup(): VOLUME");
       setupWifi();
       mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
       updateDisplay(humanize(currentWeight), "");

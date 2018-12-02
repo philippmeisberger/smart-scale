@@ -27,7 +27,7 @@ void switchMode(int newMode) {
 void selectMode() {
   // TODO: Replace by button push
   if (Serial.available() > 0) {
-    DEBUG_PRINTF("switchMode(): %i modes available\n", next_mode);
+    DEBUG_PRINTF("selectMode(): %i modes available\n", next_mode);
     int selected = selected_mode;
     char in = Serial.read();
 
