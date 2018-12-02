@@ -273,7 +273,7 @@ namespace WEIGHBRIDGE
         {
           // Publish state
           lastWeighingTime = millis();
-          publishState(currentWeight - lastWeightSent);
+          publishState((lastWeightSent == 0)? lastWeightSent : currentWeight - lastWeightSent);
           displayStandby = false;
         }
       }
