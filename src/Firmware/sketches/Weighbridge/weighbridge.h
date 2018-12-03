@@ -25,7 +25,7 @@ namespace WEIGHBRIDGE
   int lastWeighingTime = 0;
 
   // Display is currently in standby mode
-  bool displayStandby  = false;
+  bool displayStandby = false;
 
   void updateDisplay(const char* text, const char* statusText)
   {
@@ -186,6 +186,13 @@ namespace WEIGHBRIDGE
 
     void publishState(const int consumed)
     {
+      // Reduce weight variations
+      if ((lastWeightSent != 0) && (abs(consumed) <= HX711_THRESHOLD))
+      {
+        DEBUG_PRINTLN("publishState(): Not publishing as it was not drunk enough");
+        return;
+      }
+
       DEBUG_PRINTF("publishState(): Publishing state (consumed %i)\n", consumed);
       consumption += -consumed;
 
@@ -248,7 +255,7 @@ namespace WEIGHBRIDGE
       DEBUG_PRINTLN("setup(): VOLUME");
       setupWifi();
       mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
-      updateDisplay(humanize(currentWeight), "");
+      updateDisplay(humanize(consumption), "");
       lastWeighingTime = millis();
     }
 
@@ -265,10 +272,10 @@ namespace WEIGHBRIDGE
         updateStatus("");
         displayStandby = false;
       }
-      else
+      else if ((abs(currentWeight) > HX711_THRESHOLD))
       {
         // Stabilized?
-        if ((millis() - lastWeighingTime > HX711_STABILIZING_INTERVAL) && (currentWeight == weight) && (lastWeightSent != currentWeight))
+        if ((millis() - lastWeighingTime > HX711_STABILIZING_INTERVAL) && (currentWeight == weight) && (currentWeight != lastWeightSent))
         {
           // Publish state
           lastWeighingTime = millis();
