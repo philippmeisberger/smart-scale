@@ -159,7 +159,6 @@ namespace WEIGHBRIDGE
       // TODO: Maybe give up after several attempts
       while (WiFi.status() != WL_CONNECTED)
       {
-        // TODO: Maybe show splash screen
         updateDisplay("", "Connecting...");
         DEBUG_PRINT(".");
         delay(500);

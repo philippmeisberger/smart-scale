@@ -74,6 +74,7 @@ void setupDisplay() {
   // initialize with the I2C addr 0x3C (for the 128x32)
   display.begin(SSD1306_SWITCHCAPVCC, 0x3c);
 
+  // TODO: Show splash screen
   //display.clearDisplay();
   display.setTextColor(WHITE);
   display.display();
