@@ -15,7 +15,7 @@
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
 // TODO: No menu should be provided
-namespace MAIN_MODE{
+/*namespace MAIN_MODE{
 
   int _selected = 0;
   bool once = false;
@@ -61,7 +61,7 @@ namespace MAIN_MODE{
     addMode(&start_mode, &loop, (char *) "self");
   }
 
-}
+}*/
 
 
 /// ////////////////////////////////////////////////
