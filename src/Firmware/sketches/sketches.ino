@@ -5,8 +5,8 @@
 #include "config.h"
 #include "logging.h"
 #include "mode.h"
-#include "SnakeMode/snake_mode.h"
-#include "Weighbridge/weighbridge.h"
+#include "snake.h"
+#include "weighbridge.h"
 
 #define FIRMWARE_VERSION "0.5"
 

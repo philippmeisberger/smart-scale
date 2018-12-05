@@ -5,12 +5,11 @@
 #include <Adafruit_SSD1306.h>
 #include <HX711_ADC.h>
 
-#include "../config.h"
-#include "../logging.h"
-#include "../mode.h"
+#include "config.h"
+#include "logging.h"
+#include "mode.h"
 
 extern Adafruit_SSD1306 display;
-
 
 namespace WEIGHBRIDGE
 {
