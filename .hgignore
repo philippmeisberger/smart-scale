@@ -1,2 +1,4 @@
 syntax: glob
+**.orig
 config.h
+Ausarbeitung
