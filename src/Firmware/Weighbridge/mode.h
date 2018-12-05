@@ -24,6 +24,10 @@ void switchMode(int newMode) {
   modes[selected_mode].setup();
 }
 
+void SwitchNextMode(){
+  switchMode(selected_mode + 1);
+}
+
 void selectMode() {
   // TODO: Replace by button push
   if (Serial.available() > 0) {
