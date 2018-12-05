@@ -10,7 +10,7 @@
 
 ## Configuration
 
-The firmware must be configured before flashing to ESP8266. Rename `src/Firmware/sketches/config-sample.h` to `src/Firmware/sketches/config.h` and change the values like desired.
+The firmware must be configured before flashing to ESP8266. Rename `src/Firmware/Weighbridge/config-sample.h` to `src/Firmware/Weighbridge/config.h` and change the values like desired.
 
 ## Example configuration for Home Assistant
 
