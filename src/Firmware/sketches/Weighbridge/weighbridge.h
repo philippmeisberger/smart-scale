@@ -131,9 +131,6 @@ namespace WEIGHBRIDGE
     // Overall consumption
     int consumption = 0;
 
-    // Number of attempts to connect to MQTT broker
-    int mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
-
     void setupWifi()
     {
       // Stay offline
@@ -220,17 +217,7 @@ namespace WEIGHBRIDGE
         {
           DEBUG_PRINTF("publishState(): Connection failed with error code %i\n", mqttClient.state());
           updateStatus("Publishing failed");
-
-          // Give up?
-          if (mqttConnectionAttempts == 0)
-          {
-            DEBUG_PRINTLN("publishState(): Maximum connection attempts exceeded... Giving up");
-            mqttConnectionAttempts = MQTT_CONNECTION_ATTEMPTS;
-            return;
-          }
-
-          mqttConnectionAttempts--;
-          delay(MQTT_CONNECTION_ATTEMPT_DELAY);
+          return;
         }
       }
 
