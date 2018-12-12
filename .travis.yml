@@ -23,7 +23,8 @@ install:
   - arduino --board esp8266:esp8266:generic --save-prefs
   # Install dependent libraries
   - arduino --install-library "PubSubClient"
-  - arduino --install-library "ArduinoJson:5.13.3"
+  - git clone https://github.com/bblanchon/ArduinoJson /usr/local/share/arduino/libraries/ArduinoJson
+  #- arduino --install-library "ArduinoJson:5.13.3"
   - arduino --install-library "Adafruit GFX Library"
   - arduino --install-library "Adafruit SSD1306"
   - arduino --install-library "HX711_ADC"
