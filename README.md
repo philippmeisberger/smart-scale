@@ -1,5 +1,7 @@
 # Weighbridge using ESP8266 and Home Assistant
 
+Drinking enough water every day is important. This gadget helps to monitor your drinking behavior.
+
 ## Dependencies
 
 * ArduinoJson
