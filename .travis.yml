@@ -2,7 +2,7 @@ language: c
 env:
   global:
     - ARDUINO_VERSION=1.8.7
-    - BD=esp8266:esp8266:d1:CpuFrequency=80,FlashSize=4M3M
+    - BD=esp8266:esp8266:nodemcuv2
 
 before_install:
   - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
@@ -36,7 +36,7 @@ script:
   - "echo $HOME"
   - "ls $PWD"
   - "echo $BD"
-  - arduino --verify $PWD/src/Firmware/Weighbridge/Weighbridge.ino
+  - arduino --verify --board $BD $PWD/src/Firmware/Weighbridge/Weighbridge.ino
 
 notifications:
   email:
