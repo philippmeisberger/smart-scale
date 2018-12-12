@@ -2,9 +2,9 @@
 #define MODE_H
 
 struct mode {
-    char *name;
     void (*setup)();
     void (*loop)();
+    char *name;
 
     mode() : setup(NULL), loop(NULL), name(NULL){}
     mode(void (*setup)(), void (*loop)(), char* name) : setup(setup), loop(loop), name(name){}
