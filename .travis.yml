@@ -29,7 +29,7 @@ install:
   - arduino --install-library "Adafruit SSD1306"
   - arduino --install-library "HX711_ADC"
   # Rename config
-  - cp sample-config.h config.h
+  - cp $PWD/src/Firmware/Weighbridge/sample-config.h $PWD/src/Firmware/Weighbridge/config.h
 
 script:
   - "echo $PWD"
