@@ -1,5 +1,7 @@
 # Weighbridge using ESP8266 and Home Assistant
 
+[![Build Status](https://travis-ci.org/philippmeisberger/smart-scale.svg?branch=master)](https://travis-ci.org/philippmeisberger/smart-scale)
+
 Drinking enough water every day is important. This gadget helps to monitor your drinking behavior.
 
 ## Dependencies

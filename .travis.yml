@@ -1,0 +1,43 @@
+language: c
+env:
+  global:
+    - ARDUINO_VERSION=1.8.7
+    - BD=esp8266:esp8266:d1:CpuFrequency=80,FlashSize=4M3M
+
+before_install:
+  - "/sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_1.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -ac -screen 0 1280x1024x16"
+  - sleep 3
+  - export DISPLAY=:1.0
+  # Download and setup Arduino IDE
+  - wget http://downloads.arduino.cc/arduino-${ARDUINO_VERSION}-linux64.tar.xz
+  - tar xf arduino-${ARDUINO_VERSION}-linux64.tar.xz
+  - sudo mv arduino-${ARDUINO_VERSION} /usr/local/share/arduino
+  - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
+
+install:
+  - ln -s $PWD /usr/local/share/arduino/libraries/Weighbridge
+  - arduino --pref "compiler.warning_level=all" --save-prefs
+  # Install ESP8266 board manager
+  - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
+  - arduino --install-boards esp8266:esp8266
+  - arduino --board esp8266:esp8266:generic --save-prefs
+  # Install dependent libraries
+  - arduino --install-library "PubSubClient"
+  - arduino --install-library "ArduinoJson:5.13.3"
+  - arduino --install-library "Adafruit GFX Library"
+  - arduino --install-library "Adafruit SSD1306"
+  - arduino --install-library "HX711_ADC"
+  # Rename config
+  - cp sample-config.h config.h
+
+script:
+  - "echo $PWD"
+  - "echo $HOME"
+  - "ls $PWD"
+  - "echo $BD"
+  - arduino --verify --board $BD $PWD/Weighbridge.ino
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
