@@ -1,7 +1,7 @@
 language: c
 env:
   global:
-    - ARDUINO_VERSION=1.8.7
+    - ARDUINO_VERSION=1.8.8
     - BD=esp8266:esp8266:nodemcuv2
 
 before_install:
