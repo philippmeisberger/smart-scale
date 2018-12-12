@@ -88,10 +88,6 @@ void setupDisplay() {
 
 void setupWifi()
 {
-  // Stay offline
-  if ((WIFI_SSID == "") || (WIFI_PASSWORD == ""))
-    return;
-
   // Already connected
   if (WiFi.status() == WL_CONNECTED)
   {
