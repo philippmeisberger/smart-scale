@@ -4,11 +4,11 @@ Drinking enough water every day is important. This gadget helps to monitor your 
 
 ## Dependencies
 
-* ArduinoJson
-* Adafruit GFX Library
-* Adafruit SSD1306
-* HX711_ADC
-* PubSubClient
+* [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+* [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
+* [Adafruit SSD1306](https://github.com/adafruit/Adafruit_SSD1306)
+* [HX711_ADC](https://github.com/olkal/HX711_ADC)
+* [PubSubClient](https://github.com/knolleary/pubsubclient)
 
 ## Connection
 
