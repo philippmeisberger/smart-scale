@@ -36,7 +36,7 @@ script:
   - "echo $HOME"
   - "ls $PWD"
   - "echo $BD"
-  - arduino --verify --board $BD $PWD/Weighbridge.ino
+  - arduino --verify --board $BD $PWD/src/Firmware/Weighbridge/Weighbridge.ino
 
 notifications:
   email:
