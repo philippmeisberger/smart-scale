@@ -15,7 +15,7 @@ before_install:
   - sudo ln -s /usr/local/share/arduino/arduino /usr/local/bin/arduino
 
 install:
-  - ln -s $PWD /usr/local/share/arduino/libraries/Weighbridge/src/Firmware/Weighbridge/
+  - ln -s $PWD /usr/local/share/arduino/libraries/Weighbridge
   - arduino --pref "compiler.warning_level=all" --save-prefs
   # Install ESP8266 board manager
   - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
