@@ -8,6 +8,7 @@
 #include "snake.h"
 #include "weighbridge.h"
 #include "mqtt.h"
+#include "splashscreen.h"
 
 #define FIRMWARE_VERSION "0.6"
 
@@ -79,10 +80,11 @@ void setupDisplay() {
 
   // initialize with the I2C addr 0x3C (for the 128x32)
   display.begin(SSD1306_SWITCHCAPVCC, 0x3c);
-
-  // TODO: Show splash screen
-  //display.clearDisplay();
+  display.clearDisplay();
   display.setTextColor(WHITE);
+
+  // Show splash screen
+  display.drawBitmap((display.width() - SPLASHSCREEN_WIDTH) / 2, (display.height() - SPLASHSCREEN_HEIGHT) / 2, SPLASHSCREEN, SPLASHSCREEN_WIDTH, SPLASHSCREEN_HEIGHT, 1);
   display.display();
 }
 
