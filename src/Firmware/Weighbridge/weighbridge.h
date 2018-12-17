@@ -1,13 +1,11 @@
 #include <ESP8266WiFi.h>
-#include <PubSubClient.h>
 #include <ArduinoJson.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <HX711_ADC.h>
 
 #include "config.h"
 #include "logging.h"
 #include "mode.h"
+#include "mqtt.h"
 
 extern Adafruit_SSD1306 display;
 
@@ -120,8 +118,6 @@ namespace WEIGHBRIDGE
 
   namespace VOLUME
   {
-    WiFiClient wifiClient = WiFiClient();
-    PubSubClient mqttClient = PubSubClient(wifiClient);
     const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
     // Last published weight
@@ -129,41 +125,6 @@ namespace WEIGHBRIDGE
 
     // Overall consumption
     int consumption = 0;
-
-    void setupWifi()
-    {
-      // Stay offline
-      if ((WIFI_SSID == "") || (WIFI_PASSWORD == ""))
-        return;
-
-      // Already connected
-      if (WiFi.status() == WL_CONNECTED)
-        return;
-
-      DEBUG_PRINTF("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
-
-      // Do not store Wi-Fi config in SDK flash area
-      WiFi.persistent(false);
-
-      // Disable auto Wi-Fi access point mode
-      WiFi.mode(WIFI_STA);
-
-      // Start Wi-Fi connection
-      WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-
-      // Wi-Fi not yet connected?
-      // TODO: Maybe give up after several attempts
-      while (WiFi.status() != WL_CONNECTED)
-      {
-        updateDisplay("", "Connecting...");
-        DEBUG_PRINT(".");
-        delay(500);
-      }
-
-      // Wi-Fi connection established
-      DEBUG_PRINT("setupWifi(): Connected to Wi-Fi access point. Obtained IP address: ");
-      DEBUG_PRINTLN(WiFi.localIP());
-    }
 
     String humanize(const int value)
     {
@@ -193,34 +154,17 @@ namespace WEIGHBRIDGE
       consumption += -consumed;
 
       // Offline
-      if ((WIFI_SSID == "") || (WIFI_PASSWORD == ""))
+      if (WiFi.status() != WL_CONNECTED)
       {
-        DEBUG_PRINTLN("publishState(): Not publishing in offline mode");
+        DEBUG_PRINTLN("publishState(): No WiFi connection");
         lastWeightSent = currentWeight;
-        updateStatus("Offline");
+        updateStatus("No WiFi connection");
         return;
       }
 
       updateStatus("");
 
-      // Connect MQTT broker
-      while (!mqttClient.connected())
-      {
-        DEBUG_PRINTF("publishState(): Connecting to MQTT broker '%s: %i'...\n", MQTT_SERVER, MQTT_PORT);
-
-        if (mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
-        {
-          DEBUG_PRINTLN("publishState(): Connected to MQTT broker");
-        }
-        else
-        {
-          DEBUG_PRINTF("publishState(): Connection failed with error code %i\n", mqttClient.state());
-          updateStatus("Publishing failed");
-          return;
-        }
-      }
-
-      // Send JSON
+      // Initialize JSON
       StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
       JsonObject& json = jsonBuffer.createObject();
 
@@ -230,8 +174,11 @@ namespace WEIGHBRIDGE
       char message[json.measureLength() + 1];
       json.printTo(message, sizeof(message));
 
-      DEBUG_PRINTF("publishState(): Publishing message on channel '%s': %s\n", MQTT_CHANNEL_STATE, message);
-      mqttClient.publish(MQTT_CHANNEL_STATE, message);
+      // Publish JSON
+      if (!publish(MQTT_CHANNEL_STATE, message))
+      {
+        updateStatus("Publishing failed");
+      }
 
       lastWeightSent = currentWeight;
     }
@@ -239,8 +186,6 @@ namespace WEIGHBRIDGE
     void setup()
     {
       DEBUG_PRINTLN("setup(): VOLUME");
-      setupWifi();
-      mqttClient.setServer(MQTT_SERVER, MQTT_PORT);
       updateDisplay(humanize(consumption), "");
       lastWeighingTime = millis();
     }
@@ -270,7 +215,6 @@ namespace WEIGHBRIDGE
         }
       }
 
-      mqttClient.loop();
       WEIGHBRIDGE::loop();
     }
   }
