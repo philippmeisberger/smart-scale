@@ -1,6 +1,10 @@
 #include "config.h"
+#include <ArduinoJson.h>
 #include "logging.h"
 #include "mode.h"
+#include "mqtt.h"
+
+#define MQTT_SNAKE_CHANNEL            "/weighbridge/api/2/state/"
 
 extern Adafruit_SSD1306 display;
 
@@ -181,6 +185,17 @@ namespace SNAKE_MODE {
     display.setCursor(16, 16);
     display.printf("Score: %d", tail.size);
     display.display();
+
+    StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+    JsonObject& json = jsonBuffer.createObject();
+
+    json["score"] = tail.size;
+
+    char message[json.measureLength() + 1];
+    json.printTo(message, sizeof(message));
+    publish(MQTT_SNAKE_STATE, message)
+
+
     delay(1000);
 
     delete[] tail.content;
