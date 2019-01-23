@@ -4,8 +4,6 @@
 #include "mode.h"
 #include "mqtt.h"
 
-#define MQTT_SNAKE_CHANNEL            "/weighbridge/api/2/state/"
-
 extern Adafruit_SSD1306 display;
 
 namespace SNAKE_MODE {
