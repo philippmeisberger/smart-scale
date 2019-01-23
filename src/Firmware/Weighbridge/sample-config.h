@@ -8,8 +8,6 @@
 #define HX711_STABILIZING_INTERVAL    2000
 #define HX711_THRESHOLD               1      // Reduce weight variations (more than 1ml must be drunk)
 
-#define LCD_TIMEOUT                   30000
-
 #define OLED_WIDTH                    128    // OLED display width in pixels
 #define OLED_HEIGHT                   64     // OLED display height in pixels
 #define OLED_TIMEOUT                  30000  // OLED timeout in milliseconds
