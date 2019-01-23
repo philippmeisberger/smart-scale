@@ -1,5 +1,4 @@
 language: c
-dist: xenial
 env:
   global:
     - ARDUINO_VERSION=1.8.8
