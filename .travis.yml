@@ -19,7 +19,7 @@ install:
   #- arduino --pref "compiler.warning_level=all" --save-prefs
   # Install ESP8266 board manager
   - arduino --pref "boardsmanager.additional.urls=http://arduino.esp8266.com/stable/package_esp8266com_index.json" --save-prefs
-  - arduino --install-boards esp8266:esp8266
+  - arduino --install-boards esp8266:esp8266:2.4.2
   - arduino --board esp8266:esp8266:generic --save-prefs
   # Install dependent libraries
   - arduino --install-library "PubSubClient"
