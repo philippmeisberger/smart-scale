@@ -94,6 +94,8 @@ namespace SNAKE_MODE {
     return bounty;
   }
 
+  int time_played = 0;
+  
   void game(){
     int width = OLED_WIDTH / 4;
     int height = OLED_HEIGHT / 4;
@@ -120,6 +122,7 @@ namespace SNAKE_MODE {
 
     while(dir != 4){
 
+      time_played++;
       // move in direction:
       // todo: replace with hardware buttons:
       if(Serial.available() > 0){
@@ -187,6 +190,7 @@ namespace SNAKE_MODE {
     StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
     JsonObject& json = jsonBuffer.createObject();
 
+    json["time_played"] = time_played;
     json["score"] = tail.size;
 
     char message[json.measureLength() + 1];
@@ -216,7 +220,7 @@ namespace SNAKE_MODE {
       display.drawPixel(i, 16, WHITE);
       if (i % 10 == 0) display.display();
     }
-
+    time_played = 0;
     game();
     delay(3000);
     switchMode(0);
