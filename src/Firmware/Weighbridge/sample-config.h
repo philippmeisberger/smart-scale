@@ -19,4 +19,4 @@
 #define MQTT_USERNAME                 MQTT_CLIENTID
 #define MQTT_PASSWORD                 ""
 #define MQTT_CHANNEL_STATE            "/weighbridge/api/1/state/"
-#define MQTT_SNAKE_CHANNEL            "/weighbridge/api/2/state/"
+#define MQTT_SNAKE_CHANNEL            "/snake/api/1/state/"
