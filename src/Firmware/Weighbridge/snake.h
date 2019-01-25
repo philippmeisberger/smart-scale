@@ -1,6 +1,7 @@
 #include "config.h"
 #include "logging.h"
 #include "mode.h"
+#include "text_utils.h"
 
 extern Adafruit_SSD1306 display;
 
@@ -193,15 +194,17 @@ namespace SNAKE_MODE {
 
   void loop() {
     display.clearDisplay();
-    DEBUG_PRINTLN("LOOP");
+    print_text_centered_in_box(0, 0, OLED_WIDTH, OLED_HEIGHT, "SNAKE");
+    print_text_centered_in_box(0, 50, OLED_WIDTH, 14, ">> Play >>", true);
+    display.display();
 
-    display.setTextSize(2);
-    display.setCursor(0, 0);
-    display.println("loading");
+    if(Serial.available() <= 0)
+      return;
 
-    for (int i = 0; i < OLED_WIDTH; ++i) {
-      display.drawPixel(i, 16, WHITE);
-      if (i % 10 == 0) display.display();
+    char in = Serial.peek();
+    if(in != 'd'){
+      selectMode();
+      return;
     }
 
     game();
