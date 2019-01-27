@@ -6,6 +6,7 @@
 #include "logging.h"
 #include "mode.h"
 #include "mqtt.h"
+#include "buttons.h"
 
 extern Adafruit_SSD1306 display;
 
@@ -13,13 +14,13 @@ namespace WEIGHBRIDGE
 {
   // Connect black to E+, red to E-, green to A+, white to A-
   // Connect SCK to D8, DT to D3
-  HX711_ADC hx711(D3, D8);
+  HX711_ADC hx711(D3, D9);
 
   // Currently displayed weight
   int currentWeight = 0;
 
   // Timestamp of last weighing process
-  int lastWeighingTime = 0;
+  unsigned long lastWeighingTime = 0;
 
   // Display is currently in standby mode
   bool displayStandby = false;
@@ -110,6 +111,12 @@ namespace WEIGHBRIDGE
         lastWeighingTime = millis();
         updateStatus("");
         displayStandby = false;
+      }
+
+      if (getButtonUpState() == HIGH)
+      {
+        hx711.tare();
+        DEBUG_PRINTLN("loop(): Tare");
       }
 
       WEIGHBRIDGE::loop();
