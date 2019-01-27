@@ -117,12 +117,12 @@ namespace SNAKE_MODE {
 
       DEBUG_PRINTLN("RING CREATE");
 
-      tail.push(coord(width/2 -1, height/2));
-      tail.push(coord(width/2 +0, height/2));
-      tail.push(coord(width/2 +1, height/2));
-      tail.push(coord(width/2 +2, height/2));
+      tail->push(coord(width/2 -1, height/2));
+      tail->push(coord(width/2 +0, height/2));
+      tail->push(coord(width/2 +1, height/2));
+      tail->push(coord(width/2 +2, height/2));
 
-      bounty = get_bounty_point(&head, &tail, width, height); // coord(random(width), random(height));
+      bounty = get_bounty_point(&head, tail, width, height); // coord(random(width), random(height));
 
       lastTime = gameTime = millis();
       dir = 0;
@@ -138,7 +138,7 @@ namespace SNAKE_MODE {
       display.setCursor(0, 0);
       display.println("GameOver");
       display.setCursor(16, 16);
-      display.printf("Score: %d", tail.size);
+      display.printf("Score: %d", tail->size);
       display.display();
       delay(1000);
 
@@ -173,27 +173,27 @@ namespace SNAKE_MODE {
 
     // check if "next" is bounty
     if(next != bounty){
-      tail.pop();
+      tail->pop();
     }else{
       bounty = get_bounty_point(&head, &tail, width, height);
     }
 
     // check if bitten in tail:
-    for(int i = 0; i < tail.size-1; ++i){ // ignore last
-      if(tail.get(i) == next){
+    for(int i = 0; i < tail->size-1; ++i){ // ignore last
+      if(tail->get(i) == next){
         gamestate = 18;
         return;
       }
     }
 
     //tail.insert(tail.begin(), head);
-    tail.push(next);
+    tail->push(next);
     head = next;
 
     // RENDER:
     display.clearDisplay();
-    for(int i = 0; i < tail.size; ++i){
-      coord c = tail.get(i);
+    for(int i = 0; i < tail->size; ++i){
+      coord c = tail->get(i);
 
       display.fillRect(c.x*4, c.y*4, 3, 3, WHITE);
     }
