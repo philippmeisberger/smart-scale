@@ -17,7 +17,7 @@
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
 // Timestamp of last Wi-Fi connection attempt
-int lastWifiConnectionAttempt = 0;
+unsigned long lastWifiConnectionAttempt = 0;
 
 extern PubSubClient mqttClient;
 
