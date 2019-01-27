@@ -34,16 +34,16 @@ void selectMode()
 {
   uint8_t selected = selected_mode;
 
-  if (getButtonLeftState() == HIGH)
+  if (getButtonDownState() == HIGH)
   {
-    DEBUG_PRINTLN("BUTTON_LEFT");
+    DEBUG_PRINTLN("BUTTON_DOWN");
     switchMode(--selected);
     return;
   }
-  
-  if (getButtonRightState() == HIGH)
+
+  if (getButtonUpState() == HIGH)
   {
-    DEBUG_PRINTLN("BUTTON_RIGHT");
+    DEBUG_PRINTLN("BUTTON_UP");
     switchMode(++selected);
     return;
   }
