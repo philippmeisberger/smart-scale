@@ -20,3 +20,5 @@
 #define MQTT_PASSWORD                 ""
 #define MQTT_CHANNEL_STATE            "/weighbridge/api/1/state/"
 #define MQTT_SNAKE_CHANNEL            "/snake/api/1/state/"
+#define MQTT_CONNECTION_ATTEMPTS      3
+#define MQTT_CONNECTION_ATTEMPT_DELAY 2000
