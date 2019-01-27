@@ -41,7 +41,7 @@ namespace SNAKE_MODE {
     }
 
     ~ring(){
-      delete[] this.content[];
+      delete[] this->content;
     }
 
     void push(T element){
@@ -175,7 +175,7 @@ namespace SNAKE_MODE {
     if(next != bounty){
       tail->pop();
     }else{
-      bounty = get_bounty_point(&head, &tail, width, height);
+      bounty = get_bounty_point(&head, tail, width, height);
     }
 
     // check if bitten in tail:
