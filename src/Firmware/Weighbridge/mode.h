@@ -1,6 +1,8 @@
 #ifndef MODE_H
 #define MODE_H
 
+#include "buttons.h"
+
 struct mode {
     void (*setup)();
     void (*loop)();
@@ -28,23 +30,22 @@ void SwitchNextMode(){
   switchMode(selected_mode + 1);
 }
 
-void selectMode() {
-  // TODO: Replace by button push
-  if (Serial.available() > 0) {
-    DEBUG_PRINTF("selectMode(): %i modes available\n", next_mode);
-    uint8_t selected = selected_mode;
-    char in = Serial.read();
+void selectMode()
+{
+  uint8_t selected = selected_mode;
 
-    if (in == 'w') {
-      selected--;
-    }
-    else if (in == 's') {
-      selected++;
-    }
-
-    Serial.flush();
-    switchMode(selected);
-    delay(100);
+  if (getButtonLeftState() == HIGH)
+  {
+    DEBUG_PRINTLN("BUTTON_LEFT");
+    switchMode(--selected);
+    return;
+  }
+  
+  if (getButtonRightState() == HIGH)
+  {
+    DEBUG_PRINTLN("BUTTON_RIGHT");
+    switchMode(++selected);
+    return;
   }
 }
 

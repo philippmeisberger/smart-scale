@@ -116,6 +116,11 @@ void setup() {
   delay(250);
   Serial.printf("ESP8266 Smart Weighbridge '%s'\n", FIRMWARE_VERSION);
 #endif
+  pinMode(BUTTON_UP, INPUT);
+  pinMode(BUTTON_DOWN, INPUT);
+  pinMode(BUTTON_RIGHT, INPUT);
+  pinMode(BUTTON_LEFT, INPUT);
+
   setupDisplay();
   setupWifi();
   // randomSeed(analogRead(0));

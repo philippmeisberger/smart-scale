@@ -13,11 +13,15 @@
 #define OLED_HEIGHT                   64     // OLED display height in pixels
 #define OLED_TIMEOUT                  30000  // OLED timeout in milliseconds
 
+#define BUTTON_DEBOUNCE_DELAY         50
+#define BUTTON_UP                     D5
+#define BUTTON_DOWN                   D4
+#define BUTTON_RIGHT                  D7
+#define BUTTON_LEFT                   D6
+
 #define MQTT_CLIENTID                 "weighbridge"
 #define MQTT_SERVER                   "hassio.local"
 #define MQTT_PORT                     1883
 #define MQTT_USERNAME                 MQTT_CLIENTID
 #define MQTT_PASSWORD                 ""
 #define MQTT_CHANNEL_STATE            "/weighbridge/api/1/state/"
-#define MQTT_CONNECTION_ATTEMPTS      3
-#define MQTT_CONNECTION_ATTEMPT_DELAY 2000
