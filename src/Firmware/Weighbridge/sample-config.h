@@ -4,6 +4,8 @@
 #define WIFI_PASSWORD                 ""
 #define WIFI_CONNECTING_INTERVAL      8000
 
+#define HX711_SCK                     D9
+#define HX711_DT                      D3
 #define HX711_STARTUP_DELAY           0
 #define HX711_CALIBRATION_FACTOR      392.0  // 5kg sensor
 #define HX711_STABILIZING_INTERVAL    2000
