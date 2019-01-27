@@ -40,6 +40,10 @@ namespace SNAKE_MODE {
       content = new T[size];
     }
 
+    ~ring(){
+      delete[] this.content[];
+    }
+
     void push(T element){
       if(size + 1 == maxSize){
         DEBUG_PRINTLN("RING IS FULL!");
@@ -96,7 +100,7 @@ namespace SNAKE_MODE {
 
   byte gamestate, dir = 0;
   coord head, bounty;
-  ring<coord> tail;
+  ring<coord> *tail;
 
   unsigned long gameTime;
   unsigned long lastTime;
@@ -109,7 +113,7 @@ namespace SNAKE_MODE {
       head = coord(width/2 +2, height/2);
 
       DEBUG_PRINTLN("!");
-      tail = ring<coord>(width*height);
+      tail = new ring<coord>(width*height);
 
       DEBUG_PRINTLN("RING CREATE");
 
@@ -139,21 +143,21 @@ namespace SNAKE_MODE {
       delay(1000);
 
       gamestate = 20;
-      delete[] tail.content;
+      delete tail;
       return;
     }
+
+    if(getButtonUpState() == HIGH && dir % 2 == 0) dir = 1;
+    if(getButtonDownState() == HIGH && dir % 2 == 0) dir = 3;
+    if(getButtonRightState() == HIGH && dir % 2 == 1) dir = 0;
+    if(getButtonLeftState() == HIGH && dir % 2 == 1) dir = 2;
 
     if(millis() - lastTime < 200){
       return;
     }
 
     lastTime = millis();
- 
-    if(getButtonUpState() == HIGH && dir % 2 == 0) dir = 1;
-    if(getButtonDownState() == HIGH && dir % 2 == 0) dir = 3;
-    if(getButtonRightState() == HIGH && dir % 2 == 1) dir = 0;
-    if(getButtonLeftState() == HIGH && dir % 2 == 1) dir = 2;
-    
+
     coord next = dir % 2 == 0 ? coord(head.x + (1 - dir), head.y)
                                 : coord(head.x, head.y - (2 - dir));
 
