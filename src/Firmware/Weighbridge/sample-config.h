@@ -14,10 +14,10 @@
 #define OLED_TIMEOUT                  30000  // OLED timeout in milliseconds
 
 #define BUTTON_DEBOUNCE_DELAY         50
-#define BUTTON_UP                     D5
-#define BUTTON_DOWN                   D4
-#define BUTTON_RIGHT                  D7
-#define BUTTON_LEFT                   D6
+#define BUTTON_UP                     D6
+#define BUTTON_DOWN                   D5
+#define BUTTON_RIGHT                  D8
+#define BUTTON_LEFT                   D7
 
 #define MQTT_CLIENTID                 "weighbridge"
 #define MQTT_SERVER                   "hassio.local"
