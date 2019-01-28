@@ -26,10 +26,6 @@ void switchMode(uint8_t newMode) {
   modes[selected_mode].setup();
 }
 
-void SwitchNextMode(){
-  switchMode(selected_mode + 1);
-}
-
 void selectMode()
 {
   uint8_t selected = selected_mode;
