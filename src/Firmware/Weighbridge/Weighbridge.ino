@@ -99,6 +99,7 @@ void setupWifi()
   }
 
   DEBUG_PRINTF("setupWifi(): Connecting to Wi-Fi access point '%s'\n", WIFI_SSID);
+  WiFi.hostname(MQTT_CLIENTID);
 
   // Do not store Wi-Fi config in SDK flash area
   WiFi.persistent(false);
