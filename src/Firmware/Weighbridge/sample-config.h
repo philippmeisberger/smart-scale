@@ -4,6 +4,8 @@
 #define WIFI_PASSWORD                 ""
 #define WIFI_CONNECTING_INTERVAL      8000
 
+#define HX711_SCK                     D9
+#define HX711_DT                      D3
 #define HX711_STARTUP_DELAY           0
 #define HX711_CALIBRATION_FACTOR      392.0  // 5kg sensor
 #define HX711_STABILIZING_INTERVAL    2000
@@ -14,10 +16,10 @@
 #define OLED_TIMEOUT                  30000  // OLED timeout in milliseconds
 
 #define BUTTON_DEBOUNCE_DELAY         50
-#define BUTTON_UP                     D5
-#define BUTTON_DOWN                   D4
-#define BUTTON_RIGHT                  D7
-#define BUTTON_LEFT                   D6
+#define BUTTON_UP                     D6
+#define BUTTON_DOWN                   D5
+#define BUTTON_RIGHT                  D8
+#define BUTTON_LEFT                   D7
 
 #define MQTT_CLIENTID                 "weighbridge"
 #define MQTT_SERVER                   "hassio.local"

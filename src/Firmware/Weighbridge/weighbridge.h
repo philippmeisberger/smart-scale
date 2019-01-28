@@ -13,8 +13,7 @@ extern Adafruit_SSD1306 display;
 namespace WEIGHBRIDGE
 {
   // Connect black to E+, red to E-, green to A+, white to A-
-  // Connect SCK to D8, DT to D3
-  HX711_ADC hx711(D3, D9);
+  HX711_ADC hx711(HX711_DT, HX711_SCK);
 
   // Currently displayed weight
   int currentWeight = 0;
@@ -113,7 +112,7 @@ namespace WEIGHBRIDGE
         displayStandby = false;
       }
 
-      if (getButtonUpState() == HIGH)
+      if (getButtonLeftState() == HIGH)
       {
         hx711.tare();
         DEBUG_PRINTLN("loop(): Tare");

@@ -10,14 +10,14 @@
 #include "mqtt.h"
 #include "splashscreen.h"
 
-#define FIRMWARE_VERSION "0.6"
+#define FIRMWARE_VERSION "0.7"
 
 // Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
 Adafruit_SSD1306 display(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET);
 
 // Timestamp of last Wi-Fi connection attempt
-int lastWifiConnectionAttempt = 0;
+unsigned long lastWifiConnectionAttempt = 0;
 
 extern PubSubClient mqttClient;
 

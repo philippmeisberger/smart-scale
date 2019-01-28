@@ -5,6 +5,7 @@
 #include "mqtt.h"
 
 #include "text_utils.h"
+#include "buttons.h"
 
 extern Adafruit_SSD1306 display;
 
@@ -40,6 +41,10 @@ namespace SNAKE_MODE {
 
     ring(int size) : first(0), last(0), maxSize(size), size(0){
       content = new T[size];
+    }
+
+    ~ring(){
+      delete[] this->content;
     }
 
     void push(T element){
@@ -96,138 +101,151 @@ namespace SNAKE_MODE {
     return bounty;
   }
 
-  int time_played = 0;
-  
+  byte gamestate, dir = 0;
+  coord head, bounty;
+  ring<coord> *tail;
+
+  unsigned long gameTime;
+  unsigned long lastTime;
+
   void game(){
     int width = OLED_WIDTH / 4;
     int height = OLED_HEIGHT / 4;
+    
+    if(gamestate == 10){
+      head = coord(width/2 +2, height/2);
 
-    coord head = coord(width/2 +2, height/2);
+      DEBUG_PRINTLN("!");
+      tail = new ring<coord>(width*height);
 
-    DEBUG_PRINTLN("!");
-    ring<coord> tail = ring<coord>(width*height);
+      DEBUG_PRINTLN("RING CREATE");
 
-    DEBUG_PRINTLN("RING CREATE");
+      tail->push(coord(width/2 -1, height/2));
+      tail->push(coord(width/2 +0, height/2));
+      tail->push(coord(width/2 +1, height/2));
+      tail->push(coord(width/2 +2, height/2));
 
-    tail.push(coord(width/2 -1, height/2));
-    tail.push(coord(width/2 +0, height/2));
-    tail.push(coord(width/2 +1, height/2));
-    tail.push(coord(width/2 +2, height/2));
+      bounty = get_bounty_point(&head, tail, width, height); // coord(random(width), random(height));
+
+      lastTime = gameTime = millis();
+      dir = 0;
+      DEBUG_PRINTLN("GAME START");
+      gamestate = 12;
+    }
+
+    if(gamestate == 18){
+      gameover:
+      DEBUG_PRINTLN("GAME OVER!");
+      display.clearDisplay();
+      display.setTextSize(2);
+      display.setCursor(0, 0);
+      display.println("GameOver");
+      display.setCursor(16, 16);
+      display.printf("Score: %d", tail->size);
+      display.display();
+      
+      StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+      JsonObject& json = jsonBuffer.createObject();
+
+      json["time_played"] = millis() - gameTime;
+      json["score"] = tail.size;
+
+      char message[json.measureLength() + 1];
+      json.printTo(message, sizeof(message));
+      publish(MQTT_SNAKE_STATE, message)
+      
+      delay(1000);
+
+      gamestate = 20;
+      delete tail;
+      return;
+    }
+
+    if(getButtonUpState() == HIGH && dir % 2 == 0) dir = 1;
+    if(getButtonDownState() == HIGH && dir % 2 == 0) dir = 3;
+    if(getButtonRightState() == HIGH && dir % 2 == 1) dir = 0;
+    if(getButtonLeftState() == HIGH && dir % 2 == 1) dir = 2;
+
+    if(millis() - lastTime < 200){
+      return;
+    }
 
 
-    coord bounty = get_bounty_point(&head, &tail, width, height); // coord(random(width), random(height));
+    lastTime = millis();
 
-
-    int dir = 0; // 0=right, 1=up, 2=left, 3=down
-
-    DEBUG_PRINTLN("GAME START");
-
-    while(dir != 4){
-
-      time_played++;
-      // move in direction:
-      // todo: replace with hardware buttons:
-      if(Serial.available() > 0){
-        char in = Serial.read();
-        if(in == 'w' && dir % 2 == 0) dir = 1;
-        if(in == 's' && dir % 2 == 0) dir = 3;
-        if(in == 'd' && dir % 2 == 1) dir = 0;
-        if(in == 'a' && dir % 2 == 1) dir = 2;
-      }
-
-      coord next = dir % 2 == 0 ? coord(head.x + (1 - dir), head.y)
+    coord next = dir % 2 == 0 ? coord(head.x + (1 - dir), head.y)
                                 : coord(head.x, head.y - (2 - dir));
 
-      if(next.x < 0 || next.x >= width){
-        // game over
-        break;
-      }
-      if(next.y < 0 || next.y >= height){
-        // game over
-        break;
-      }
-
-      // check if "next" is bounty
-      if(next != bounty){
-        tail.pop();
-      }else{
-        bounty = get_bounty_point(&head, &tail, width, height);
-      }
-
-      // check if bitten in tail:
-      for(int i = 0; i < tail.size-1; ++i){ // ignore last
-        if(tail.get(i) == next) goto gameover;
-      }
-
-
-      //tail.insert(tail.begin(), head);
-      tail.push(next);
-      head = next;
-
-      // RENDER:
-      display.clearDisplay();
-      for(int i = 0; i < tail.size; ++i){
-        coord c = tail.get(i);
-
-        display.fillRect(c.x*4, c.y*4, 3, 3, WHITE);
-
-      }
-
-      display.drawCircle(bounty.x*4+1, bounty.y*4+1, 1, WHITE);
-      display.display();
-
-      // Wait tick:
-      delay(300 - ((float)tail.size/tail.maxSize) * 200 );
+    if(next.x < 0 || next.x >= width){
+      // game over
+      gamestate = 18;
+      return;
     }
-    gameover:
-    DEBUG_PRINTLN("GAME OVER!");
+    if(next.y < 0 || next.y >= height){
+      gamestate = 18;
+      return;
+    }
+
+    // check if "next" is bounty
+    if(next != bounty){
+      tail->pop();
+    }else{
+      bounty = get_bounty_point(&head, tail, width, height);
+    }
+
+    // check if bitten in tail:
+    for(int i = 0; i < tail->size-1; ++i){ // ignore last
+      if(tail->get(i) == next){
+        gamestate = 18;
+        return;
+      }
+    }
+
+    //tail.insert(tail.begin(), head);
+    tail->push(next);
+    head = next;
+
+    // RENDER:
     display.clearDisplay();
-    display.setTextSize(2);
-    display.setCursor(0, 0);
-    display.println("GameOver");
-    display.setCursor(16, 16);
-    display.printf("Score: %d", tail.size);
+    for(int i = 0; i < tail->size; ++i){
+      coord c = tail->get(i);
+
+      display.fillRect(c.x*4, c.y*4, 3, 3, WHITE);
+    }
+
+
+    display.drawCircle(bounty.x*4+1, bounty.y*4+1, 1, WHITE);
     display.display();
-
-    StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-    JsonObject& json = jsonBuffer.createObject();
-
-    json["time_played"] = time_played;
-    json["score"] = tail.size;
-
-    char message[json.measureLength() + 1];
-    json.printTo(message, sizeof(message));
-    publish(MQTT_SNAKE_STATE, message)
-
-
-    delay(1000);
-
-    delete[] tail.content;
   }
 
+  
 
   void start_mode() {
-
+    gamestate = 0;
   }
 
   void loop() {
-    display.clearDisplay();
-    print_text_centered_in_box(0, 0, OLED_WIDTH, OLED_HEIGHT, "SNAKE");
-    print_text_centered_in_box(0, 50, OLED_WIDTH, 14, ">> Play >>", true);
-    display.display();
+    if(gamestate == 0){
 
-    if(Serial.available() <= 0)
-      return;
+      display.clearDisplay();
+      print_text_centered_in_box(0, 0, OLED_WIDTH, OLED_HEIGHT, "SNAKE");
+      print_text_centered_in_box(0, 50, OLED_WIDTH, 14, ">> Play >>", true);
+      display.display();
 
-    char in = Serial.peek();
-    if(in != 'd'){
-      selectMode();
+      if (getButtonRightState() == HIGH){
+        gamestate = 10;
+      }
       return;
     }
-    time_played = 0;
-    game();
-    delay(3000);
-    switchMode(0);
+
+    if(gamestate >= 10 && gamestate < 20){
+      game();
+      return;
+    }
+    if(gamestate == 20 ){
+      delay(3000);
+      switchMode(0);
+    }
   }
 
   void setup() {
