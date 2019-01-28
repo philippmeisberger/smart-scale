@@ -10,7 +10,7 @@
 #include "mqtt.h"
 #include "splashscreen.h"
 
-#define FIRMWARE_VERSION "0.6"
+#define FIRMWARE_VERSION "0.7"
 
 // Connect SCL to D1 and SDA to D2
 #define OLED_RESET 0
