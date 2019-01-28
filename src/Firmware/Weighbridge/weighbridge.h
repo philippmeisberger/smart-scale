@@ -124,8 +124,6 @@ namespace WEIGHBRIDGE
 
   namespace VOLUME
   {
-    const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
-
     // Last published weight
     int lastWeightSent = 0;
 
@@ -171,7 +169,7 @@ namespace WEIGHBRIDGE
       updateStatus("");
 
       // Initialize JSON
-      StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+      StaticJsonBuffer<JSON_OBJECT_SIZE(2)> jsonBuffer;
       JsonObject& json = jsonBuffer.createObject();
 
       json["consumed"] = consumed;
