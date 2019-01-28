@@ -144,15 +144,15 @@ namespace SNAKE_MODE {
       display.printf("Score: %d", tail->size);
       display.display();
       
-      StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+      StaticJsonBuffer<JSON_OBJECT_SIZE(4)> jsonBuffer;
       JsonObject& json = jsonBuffer.createObject();
 
       json["time_played"] = millis() - gameTime;
-      json["score"] = tail.size;
+      json["score"] = tail->size;
 
       char message[json.measureLength() + 1];
       json.printTo(message, sizeof(message));
-      publish(MQTT_SNAKE_STATE, message)
+      publish(MQTT_SNAKE_STATE, message);
       
       delay(1000);
 
