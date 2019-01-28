@@ -17,7 +17,7 @@ int publish(const char* channel, const char* message)
   // Connect MQTT broker
   while (!mqttClient.connected())
   {
-    DEBUG_PRINTF("publish(): Connecting to MQTT broker '%s: %i'...\n", MQTT_SERVER, MQTT_PORT);
+    DEBUG_PRINTF("publish(): Connecting to MQTT broker '%s:%i'...\n", MQTT_SERVER, MQTT_PORT);
 
     if (!mqttClient.connect(MQTT_CLIENTID, MQTT_USERNAME, MQTT_PASSWORD))
     {
