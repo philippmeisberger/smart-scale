@@ -112,7 +112,7 @@ namespace WEIGHBRIDGE
         displayStandby = false;
       }
 
-      if (getButtonUpState() == HIGH)
+      if (getButtonLeftState() == HIGH)
       {
         hx711.tare();
         DEBUG_PRINTLN("loop(): Tare");
