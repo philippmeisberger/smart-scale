@@ -152,7 +152,7 @@ namespace SNAKE_MODE {
 
       char message[json.measureLength() + 1];
       json.printTo(message, sizeof(message));
-      publish(MQTT_SNAKE_STATE, message);
+      publish(MQTT_CHANNEL_SNAKE, message);
       
       delay(1000);
 
