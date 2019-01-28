@@ -1,6 +1,9 @@
 #include "config.h"
+#include <ArduinoJson.h>
 #include "logging.h"
 #include "mode.h"
+#include "mqtt.h"
+
 #include "text_utils.h"
 #include "buttons.h"
 
@@ -140,6 +143,17 @@ namespace SNAKE_MODE {
       display.setCursor(16, 16);
       display.printf("Score: %d", tail->size);
       display.display();
+      
+      StaticJsonBuffer<JSON_OBJECT_SIZE(4)> jsonBuffer;
+      JsonObject& json = jsonBuffer.createObject();
+
+      json["time_played"] = millis() - gameTime;
+      json["score"] = tail->size;
+
+      char message[json.measureLength() + 1];
+      json.printTo(message, sizeof(message));
+      publish(MQTT_CHANNEL_SNAKE, message);
+      
       delay(1000);
 
       gamestate = 20;
@@ -155,6 +169,7 @@ namespace SNAKE_MODE {
     if(millis() - lastTime < 200){
       return;
     }
+
 
     lastTime = millis();
 
@@ -198,6 +213,7 @@ namespace SNAKE_MODE {
       display.fillRect(c.x*4, c.y*4, 3, 3, WHITE);
     }
 
+
     display.drawCircle(bounty.x*4+1, bounty.y*4+1, 1, WHITE);
     display.display();
   }
@@ -221,6 +237,7 @@ namespace SNAKE_MODE {
       }
       return;
     }
+
     if(gamestate >= 10 && gamestate < 20){
       game();
       return;
@@ -229,7 +246,6 @@ namespace SNAKE_MODE {
       delay(3000);
       switchMode(0);
     }
-
   }
 
   void setup() {

@@ -35,3 +35,15 @@ This example must be added to the `sensor` block of your configuration.
         name: "Total water consumption"
         unit_of_measurement: 'ml'
         value_template: "{{ value_json.consumption }}"
+
+      - platform: mqtt
+        state_topic: "/snake/api/1/state/"
+        name: "The Score you reached in a game of snake"
+        unit_of_measurement: 'points'
+        value_template: "{{ value_json.score }}"
+
+      - platform: mqtt
+        state_topic: "/snake/api/1/state/"
+        name: "The Time you spend in the game"
+        unit_of_measurement: 'seconds'
+        value_template: "{{ value_json.time_played }}"        
