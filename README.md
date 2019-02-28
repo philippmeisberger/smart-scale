@@ -6,13 +6,25 @@ Drinking enough water every day is important. This gadget helps to monitor your 
 
 ## Dependencies
 
+The project uses the following libraries:
+
 * [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 * [Adafruit GFX Library](https://github.com/adafruit/Adafruit-GFX-Library)
 * [Adafruit SSD1306](https://github.com/adafruit/Adafruit_SSD1306)
 * [HX711_ADC](https://github.com/olkal/HX711_ADC)
 * [PubSubClient](https://github.com/knolleary/pubsubclient)
 
+## 3D model
+
+The 3D model looks like this:
+
+![3D model](https://github.com/philippmeisberger/smart-scale/blob/master/doc/model.png)
+
+The file for printing the model can be found here: [3D model](https://github.com/philippmeisberger/smart-scale/blob/master/doc/model.zip)
+
 ## Connection
+
+The scale is connected as follows:
 
 ![connection](https://github.com/philippmeisberger/smart-scale/blob/master/doc/Scale.png)
 
@@ -46,4 +58,4 @@ This example must be added to the `sensor` block of your configuration.
         state_topic: "/snake/api/1/state/"
         name: "The Time you spend in the game"
         unit_of_measurement: 'seconds'
-        value_template: "{{ value_json.time_played }}"        
+        value_template: "{{ value_json.time_played }}"
